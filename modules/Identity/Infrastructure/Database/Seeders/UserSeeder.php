@@ -10,6 +10,16 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+
+        UserModel::query()->updateOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'password_hash' => Hash::make('password'),
+                'first_name' => 'Normal',
+                'last_name' => 'User',
+                'is_admin' => false,
+            ],
+        );
         UserModel::query()->updateOrCreate(
             ['email' => 'admin@example.com'],
             [
