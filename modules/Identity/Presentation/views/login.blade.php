@@ -4,6 +4,10 @@
 
         <h1 class="text-2xl font-semibold">Log in</h1>
 
+        @if (session('status'))
+            <p class="text-green-700">{{ session('status') }}</p>
+        @endif
+
         <label for="email">Email</label>
         <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus class="border p-2">
 
@@ -15,5 +19,7 @@
         @enderror
 
         <button type="submit" class="bg-stone-800 p-2 text-white">Log in</button>
+
+        <a href="{{ route('register') }}" class="underline">No account yet? Register</a>
     </form>
 </x-layouts.app>

@@ -21,6 +21,18 @@ class UserRepository implements IUserRepository
         return $model ? $this->toDomain($model) : null;
     }
 
+    public function create(string $email, string $passwordHash, string $firstName, string $lastName): User
+    {
+        $model = UserModel::query()->create([
+            'email' => $email,
+            'password_hash' => $passwordHash,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+        ]);
+
+        return $this->toDomain($model->refresh());
+    }
+
     private function toDomain(UserModel $model): User
     {
         return new User(
