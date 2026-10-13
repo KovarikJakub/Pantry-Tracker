@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\HouseholdController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -19,4 +20,9 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::view('/', 'home')->name('home');
     Route::post('/logout', LogoutController::class)->name('logout');
     Route::view('/admin', 'admin')->middleware(AuthenticateAdmin::class)->name('admin');
+    Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
+});
+
+Route::get('/households', function () {
+    return view('household.household');
 });
