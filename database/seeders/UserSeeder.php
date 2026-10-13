@@ -1,17 +1,16 @@
 <?php
 
-namespace Modules\Identity\Infrastructure\Database\Seeders;
+namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Modules\Identity\Infrastructure\Persistence\UserModel;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-
-        UserModel::query()->updateOrCreate(
+        User::query()->updateOrCreate(
             ['email' => 'user@example.com'],
             [
                 'password_hash' => Hash::make('password'),
@@ -20,7 +19,7 @@ class UserSeeder extends Seeder
                 'is_admin' => false,
             ],
         );
-        UserModel::query()->updateOrCreate(
+        User::query()->updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'password_hash' => Hash::make('password'),

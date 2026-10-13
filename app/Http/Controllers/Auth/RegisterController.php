@@ -1,20 +1,21 @@
 <?php
 
-namespace Modules\Identity\Presentation\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\EmailAlreadyRegistered;
+use App\Http\Controllers\Controller;
+use App\Services\UserRegistrar;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Modules\Identity\Application\UserRegistrar;
-use Modules\Identity\Domain\EmailAlreadyRegistered;
 
-class RegisterController
+class RegisterController extends Controller
 {
     public function create(): View
     {
-        return view('identity::register');
+        return view('auth.register');
     }
 
     public function store(Request $request, UserRegistrar $registrar): RedirectResponse

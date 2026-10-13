@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Identity\Presentation\Http\Middleware;
+namespace App\Http\Middleware;
 
+use App\Services\Authenticator;
 use Closure;
 use Illuminate\Http\Request;
-use Modules\Identity\Application\Authenticator;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -16,7 +16,7 @@ class AuthenticateAdmin
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $this->authenticator->user()?->isAdmin) {
+        if (! $this->authenticator->user()?->is_admin) {
             abort(403);
         }
 

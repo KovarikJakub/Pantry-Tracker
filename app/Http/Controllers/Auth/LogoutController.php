@@ -1,11 +1,12 @@
 <?php
 
-namespace Modules\Identity\Presentation\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
+use App\Services\Authenticator;
 use Illuminate\Http\RedirectResponse;
-use Modules\Identity\Application\Authenticator;
 
-class LogoutController
+class LogoutController extends Controller
 {
     public function __invoke(Authenticator $authenticator): RedirectResponse
     {

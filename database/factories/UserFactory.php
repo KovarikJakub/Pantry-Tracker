@@ -1,18 +1,16 @@
 <?php
 
-namespace Modules\Identity\Infrastructure\Database\Factories;
+namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Modules\Identity\Infrastructure\Persistence\UserModel;
 
 /**
- * @extends Factory<UserModel>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
-    protected $model = UserModel::class;
-
     /**
      * @return array<string, mixed>
      */

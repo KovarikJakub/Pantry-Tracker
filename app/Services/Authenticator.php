@@ -1,11 +1,10 @@
 <?php
 
-namespace Modules\Identity\Application;
+namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Contracts\Session\Session;
-use Modules\Identity\Domain\IUserRepository;
-use Modules\Identity\Domain\User;
 
 /**
  * Our own session-based authentication: verifies credentials and remembers
@@ -13,19 +12,18 @@ use Modules\Identity\Domain\User;
  */
 class Authenticator
 {
-    private const SESSION_KEY = 'identity.user_id';
+    private const SESSION_KEY = 'user_id';
 
     public function __construct(
-        private IUserRepository $usersRepository,
         private Hasher $hasher,
         private Session $session,
     ) {}
 
     public function attempt(string $email, string $password): bool
     {
-        $user = $this->usersRepository->findByEmail($email);
+        $user = User::query()->where('email', $email)->first();
 
-        if ($user === null || $user->isDeactivated || ! $this->hasher->check($password, $user->passwordHash)) {
+        if ($user === null || $user->deactivated || ! $this->hasher->check($password, $user->password_hash)) {
             return false;
         }
 
@@ -44,9 +42,9 @@ class Authenticator
             return null;
         }
 
-        $user = $this->usersRepository->findById($userId);
+        $user = User::query()->find($userId);
 
-        return $user !== null && ! $user->isDeactivated ? $user : null;
+        return $user !== null && ! $user->deactivated ? $user : null;
     }
 
     public function logout(): void
