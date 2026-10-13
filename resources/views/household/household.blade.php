@@ -1,6 +1,16 @@
 <x-layouts.app>
     <h1>My households:</h1>
 
+    @if ($households->isEmpty())
+        <p class="mt-4">You are not a member of any household yet.</p>
+    @else
+        <ul class="mt-4 list-disc pl-6">
+            @foreach ($households as $household)
+                <li><a href="{{ route('households.show', $household->id) }}">{{ $household->name }}</a></li>
+            @endforeach
+        </ul>
+    @endif
+
     <form method="POST" action="{{ route('households.store') }}" class="mt-8 flex max-w-sm flex-col gap-3">
         @csrf
 

@@ -20,9 +20,7 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::view('/', 'home')->name('home');
     Route::post('/logout', LogoutController::class)->name('logout');
     Route::view('/admin', 'admin')->middleware(AuthenticateAdmin::class)->name('admin');
+    Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
+    Route::get('/households/{id}', [HouseholdController::class, 'show'])->whereUuid('id')->name('households.show');
     Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
-});
-
-Route::get('/households', function () {
-    return view('household.household');
 });
