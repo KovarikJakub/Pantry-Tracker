@@ -21,4 +21,9 @@ class Household extends Model
     {
         return $this->hasMany(HouseholdMember::class);
     }
+
+    public function isManagedBy(string $userId): bool
+    {
+        return $this->members()->where('user_id', $userId)->where('role', 'manager')->exists();
+    }
 }

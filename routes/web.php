@@ -23,4 +23,5 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
     Route::get('/households/{id}', [HouseholdController::class, 'show'])->whereUuid('id')->name('households.show');
     Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
+    Route::post('/households/{id}/members', [HouseholdController::class, 'addMember'])->whereUuid('id')->name('households.members.store');
 });
