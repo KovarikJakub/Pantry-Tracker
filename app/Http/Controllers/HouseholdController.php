@@ -53,7 +53,7 @@ class HouseholdController extends Controller
 
     public function show(string $id, Authenticator $authenticator): View
     {
-        $household = Household::query()->whereKey($id)->first();
+        $household = Household::query()->with('appliances.shelves')->whereKey($id)->first();
 
         return view('household.show', [
             'household' => $household,
