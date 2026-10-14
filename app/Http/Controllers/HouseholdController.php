@@ -84,6 +84,32 @@ class HouseholdController extends Controller
     }
 
     /**
+     * Adds a shelf at the end of one of the household's appliances. Managers only.
+     */
+    public function addShelf(Request $request, Authenticator $authenticator, string $id, string $applianceId): RedirectResponse
+    {
+        $household = Household::query()->findOrFail($id);
+
+        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+
+        $appliance = $household->appliances()->findOrFail($applianceId);
+
+        // A separate error bag per appliance keeps errors under the form that was submitted.
+        $validated = $request->validateWithBag('shelf_'.$appliance->id, [
+            'label' => ['required', 'string', 'max:255'],
+            'max_load_capacity_g' => ['required', 'numeric', 'min:0', 'max:99999999'],
+        ]);
+
+        $appliance->shelves()->create([
+            'label' => $validated['label'],
+            'shelf_order' => ($appliance->shelves()->max('shelf_order') ?? 0) + 1,
+            'max_load_capacity_g' => $validated['max_load_capacity_g'],
+        ]);
+
+        return redirect()->route('households.show', $household->id);
+    }
+
+    /**
      * Adds an existing user, found by email, to the household. Managers only.
      */
     public function addMember(Request $request, Authenticator $authenticator, string $id): RedirectResponse
