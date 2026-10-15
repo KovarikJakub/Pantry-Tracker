@@ -14,6 +14,13 @@ class Household extends Model
         'name',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'has_custom_categories' => 'boolean',
+        ];
+    }
+
     /**
      * @return HasMany<HouseholdMember, $this>
      */
@@ -28,6 +35,16 @@ class Household extends Model
     public function appliances(): HasMany
     {
         return $this->hasMany(Appliance::class);
+    }
+
+    /**
+     * The household's own category tree. Empty until it copies the default tree.
+     *
+     * @return HasMany<Category, $this>
+     */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
     }
 
     public function isManagedBy(string $userId): bool
