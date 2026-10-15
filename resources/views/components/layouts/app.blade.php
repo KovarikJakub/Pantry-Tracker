@@ -12,6 +12,14 @@
     <div class="mx-auto flex min-h-screen max-w-5xl flex-col px-6">
         <header class="flex h-16 items-center justify-between border-b border-stone-200">
             <a href="{{ route('home') }}" class="text-lg font-semibold tracking-tight">{{ config('app.name') }}</a>
+
+            @isset($currentUser)
+                <form method="POST" action="{{ route('logout') }}" class="flex items-center gap-4 text-sm">
+                    @csrf
+                    <span>{{ $currentUser->fullName() }}</span>
+                    <button type="submit" class="underline">Log out</button>
+                </form>
+            @endisset
         </header>
 
         <main class="flex-1 py-12">

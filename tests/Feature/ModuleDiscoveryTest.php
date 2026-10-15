@@ -1,7 +1,9 @@
 <?php
 
-use Modules\Shared\Infrastructure\Providers\SharedServiceProvider;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 
-it('registers module service providers discovered in the modules directory', function () {
-    expect(app()->providerIsLoaded(SharedServiceProvider::class))->toBeTrue();
+it('loads routes and views from the modules directory', function () {
+    expect(Route::has('login'))->toBeTrue()
+        ->and(View::exists('identity::login'))->toBeTrue();
 });
