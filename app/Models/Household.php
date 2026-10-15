@@ -22,6 +22,14 @@ class Household extends Model
         return $this->hasMany(HouseholdMember::class);
     }
 
+    /**
+     * @return HasMany<Appliance, $this>
+     */
+    public function appliances(): HasMany
+    {
+        return $this->hasMany(Appliance::class);
+    }
+
     public function isManagedBy(string $userId): bool
     {
         return $this->members()->where('user_id', $userId)->where('role', 'manager')->exists();
