@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -51,13 +52,21 @@ class HouseholdController extends Controller
         return redirect()->route('households.index');
     }
 
-    public function show(string $id, Authenticator $authenticator): View
+    /**
+     * Shows the household's appliances and shelves. Members only.
+     */
+    public function show(string $id, Authenticator $authenticator): View|Response
     {
-        $household = Household::query()->with('appliances.shelves')->whereKey($id)->first();
+        $household = Household::query()->with('appliances.shelves')->findOrFail($id);
+        $userId = $authenticator->user()->id;
+
+        if (! $household->members()->where('user_id', $userId)->exists()) {
+            return response('You are not a member of this household.', 403);
+        }
 
         return view('household.show', [
             'household' => $household,
-            'isManager' => $household->isManagedBy($authenticator->user()->id),
+            'isManager' => $household->isManagedBy($userId),
         ]);
     }
 
