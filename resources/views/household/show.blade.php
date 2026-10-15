@@ -35,11 +35,48 @@
     @if ($household->appliances->isEmpty())
         <p class="mt-4">There are no appliances in this household.</p>
     @else
-        <ul class="mt-4 list-disc pl-6">
-            @foreach ($household->appliances as $appliance)
-                <li>{{ $appliance->name }}</li>
-            @endforeach
-        </ul>
+        @foreach ($household->appliances as $appliance)
+            <h2 class="mt-8 text-xl font-semibold">{{ $appliance->name }} ({{ $appliance->appliance_type }})</h2>
+
+            @if ($appliance->shelves->isEmpty())
+                <p class="mt-2">This appliance has no shelves.</p>
+            @else
+                <table class="mt-2 border">
+                    <thead>
+                        <tr>
+                            <th class="border p-2 text-left">#</th>
+                            <th class="border p-2 text-left">Label</th>
+                            <th class="border p-2 text-left">Max load (g)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($appliance->shelves as $shelf)
+                            <tr>
+                                <td class="border p-2">{{ $shelf->shelf_order }}</td>
+                                <td class="border p-2">{{ $shelf->label }}</td>
+                                <td class="border p-2">{{ number_format((float) $shelf->max_load_capacity_g, 0, '.', ' ') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+
+            @if ($isManager)
+                @php($shelfErrors = $errors->getBag('shelf_'.$appliance->id))
+
+                <form method="POST" action="{{ route('households.shelves.store', [$household->id, $appliance->id]) }}" class="mt-2 flex flex-wrap items-end gap-2">
+                    @csrf
+
+                    <input name="label" type="text" placeholder="Shelf label" required class="border p-2">
+                    <input name="max_load_capacity_g" type="number" min="0" step="0.01" placeholder="Max load (g)" required class="border p-2">
+                    <button type="submit" class="bg-stone-800 p-2 text-white">Add shelf</button>
+                </form>
+
+                @foreach ($shelfErrors->all() as $message)
+                    <p class="text-red-700">{{ $message }}</p>
+                @endforeach
+            @endif
+        @endforeach
     @endif
 
     <a href="{{ route('households.index') }}" class="mt-4 inline-block underline">Back to my households</a>
