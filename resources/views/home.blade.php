@@ -6,4 +6,5 @@
             and see what you ate, how much nutrition it gave you and what it cost.
         </p>
     </section>
+    <a href="{{ route('households.index') }}" class="text-lg font-semibold tracking-tight underline">My households</a>
 </x-layouts.app>

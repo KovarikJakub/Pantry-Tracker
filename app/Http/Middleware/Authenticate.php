@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Identity\Presentation\Http\Middleware;
+namespace App\Http\Middleware;
 
+use App\Services\Authenticator;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
-use Modules\Identity\Application\Authenticator;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

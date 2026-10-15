@@ -1,21 +1,16 @@
 <?php
 
-namespace Modules\Identity\Infrastructure\Persistence;
+namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Identity\Infrastructure\Database\Factories\UserFactory;
 
-/**
- * Eloquent mapping of the "users" table. Used only inside the Infrastructure layer.
- */
-class UserModel extends Model
+class User extends Model
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUuids;
-
-    protected $table = 'users';
 
     protected $fillable = [
         'email',
@@ -38,8 +33,8 @@ class UserModel extends Model
         ];
     }
 
-    protected static function newFactory(): UserFactory
+    public function fullName(): string
     {
-        return UserFactory::new();
+        return $this->first_name.' '.$this->last_name;
     }
 }
