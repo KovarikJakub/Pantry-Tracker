@@ -3,14 +3,15 @@
 namespace Database\Seeders;
 
 use App\Models\Household;
-use App\Models\ProductCatalog;
 use App\Models\Shelf;
 use App\Models\User;
+use App\Services\CatalogCopier;
 use Illuminate\Database\Seeder;
 
 /**
  * Seeds a demo household managed by admin@example.com, with user@example.com as a member,
- * two appliances, their shelves and food items on them. Depends on UserSeeder and CatalogSeeder.
+ * its own copy of the default catalogue, two appliances, their shelves and food items on them.
+ * Depends on UserSeeder and CatalogSeeder.
  */
 class HouseholdSeeder extends Seeder
 {
@@ -58,9 +59,11 @@ class HouseholdSeeder extends Seeder
         ],
     ];
 
-    public function run(): void
+    public function run(CatalogCopier $catalogCopier): void
     {
         $household = Household::query()->firstOrCreate(['name' => 'Demo household']);
+
+        $catalogCopier->copyDefaultTo($household);
 
         $this->addMember($household, 'admin@example.com', 'manager');
         $member = $this->addMember($household, 'user@example.com', 'member');
@@ -77,7 +80,7 @@ class HouseholdSeeder extends Seeder
                     ['shelf_order' => $index + 1, 'max_load_capacity_g' => $shelfData['max_load_capacity_g']],
                 );
 
-                $this->addItems($shelf, $shelfData['items'], $member);
+                $this->addItems($household, $shelf, $shelfData['items'], $member);
             }
         }
     }
@@ -99,14 +102,14 @@ class HouseholdSeeder extends Seeder
      *
      * @param  list<array{string, int, float, int, string}>  $items
      */
-    private function addItems(Shelf $shelf, array $items, User $registeredBy): void
+    private function addItems(Household $household, Shelf $shelf, array $items, User $registeredBy): void
     {
         if ($shelf->foodItems()->exists()) {
             return;
         }
 
         foreach ($items as [$barcode, $weightVolume, $price, $daysUntilExpiry, $status]) {
-            $product = ProductCatalog::query()->whereNull('household_id')->where('barcode', $barcode)->firstOrFail();
+            $product = $household->products()->where('barcode', $barcode)->firstOrFail();
 
             $shelf->foodItems()->create([
                 'product_id' => $product->id,
