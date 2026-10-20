@@ -47,6 +47,16 @@ class Household extends Model
         return $this->hasMany(Category::class);
     }
 
+    /**
+     * The household's private products. Global products have a NULL household_id.
+     *
+     * @return HasMany<ProductCatalog, $this>
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(ProductCatalog::class);
+    }
+
     public function isManagedBy(string $userId): bool
     {
         return $this->members()->where('user_id', $userId)->where('role', 'manager')->exists();
