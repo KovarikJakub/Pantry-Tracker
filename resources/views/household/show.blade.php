@@ -6,6 +6,7 @@
         <x-appliance.add-form :household="$household" />
     @endif
 
+    <x-food-item.add-form :household="$household" />
     <x-product.catalog :products="$household->products" />
 
     <x-appliance.list :household="$household" :is-manager="$isManager" />
