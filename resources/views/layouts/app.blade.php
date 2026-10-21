@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? $title.' | ' : '' }}{{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 <body class="min-h-screen bg-stone-50 font-sans text-stone-800 antialiased">
     <div class="mx-auto flex min-h-screen max-w-5xl flex-col px-6">
@@ -30,5 +31,6 @@
             {{ config('app.name') }}
         </footer>
     </div>
+    @livewireScripts
 </body>
 </html>
