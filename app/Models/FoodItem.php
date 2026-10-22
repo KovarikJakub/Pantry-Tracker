@@ -25,6 +25,7 @@ class FoodItem extends Model
         'status',
         'added_at',
         'removed_at',
+        'resolved_by_user_id',
     ];
 
     protected function casts(): array
@@ -60,5 +61,15 @@ class FoodItem extends Model
     public function registeredBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'registered_by_user_id');
+    }
+
+    /**
+     * The user who consumed or discarded the item.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function resolvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by_user_id');
     }
 }

@@ -5,7 +5,7 @@
 @else
     @foreach ($household->appliances as $appliance)
         <h2 class="mt-8 text-xl font-semibold">{{ $appliance->name }} ({{ $appliance->appliance_type }})</h2>
-        <x-appliance.card :appliance="$appliance"/>
+        <x-appliance.card :household="$household" :appliance="$appliance"/>
 
         @if ($isManager)
             <x-shelf.add-form :household="$household" :appliance="$appliance" />

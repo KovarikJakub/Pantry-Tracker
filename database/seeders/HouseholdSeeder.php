@@ -120,6 +120,7 @@ class HouseholdSeeder extends Seeder
                 'status' => $status,
                 'added_at' => now()->subDays(7),
                 'removed_at' => $status === 'stored' ? null : now()->subDay(),
+                'resolved_by_user_id' => $status === 'stored' ? null : $registeredBy->id,
             ]);
         }
     }

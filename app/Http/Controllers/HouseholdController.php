@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FoodItem;
 use App\Models\Household;
 use App\Models\ProductCatalog;
 use App\Models\Shelf;
@@ -60,7 +61,11 @@ class HouseholdController extends Controller
      */
     public function show(string $id, Authenticator $authenticator): View|Response
     {
-        $household = Household::query()->with('appliances.shelves')->findOrFail($id);
+        $household = Household::query()->with([
+            'appliances.shelves.foodItems' => fn ($items) => $items->where('status', 'stored'),
+            'appliances.shelves.foodItems.product',
+        ])->findOrFail($id);
+
         $userId = $authenticator->user()->id;
 
         if (! $household->members()->where('user_id', $userId)->exists()) {
@@ -173,6 +178,43 @@ class HouseholdController extends Controller
 
         return redirect()->route('households.show', $household->id)
             ->with('food_item_status', "{$product->name} was added.");
+    }
+
+    /**
+     * Marks a stored food item of the household as consumed by the current user. Members only.
+     */
+    public function removeFoodItem(Request $request, Authenticator $authenticator, string $id, string $foodItemId): RedirectResponse
+    {
+        $action = $request->validate([
+            'action' => ['required', Rule::in(['consumed', 'thrown_out', 'removed'])],
+        ])['action'];
+
+        $household = Household::query()->findOrFail($id);
+        $userId = $authenticator->user()->id;
+
+        abort_unless($household->members()->where('user_id', $userId)->exists(), 403);
+
+        // find the food item
+        $foodItem = FoodItem::query()
+            ->whereHas('shelf.appliance', fn (Builder $appliances) => $appliances->where('household_id', $household->id))
+            ->where('status', 'stored')
+            ->findOrFail($foodItemId);
+
+        // The Food Item should be removed without any trace in DB:
+        if($action === 'removed')
+        {
+            $foodItem->delete();
+        }
+        else {
+            // The Food item was either consumed or thrown out, but we want to keep track of it:
+            $foodItem->update([
+                'status' => $action,
+                'removed_at' => now(),
+                'resolved_by_user_id' => $userId,
+            ]);
+        }
+
+        return redirect()->route('households.show', $household->id);
     }
 
     /**
