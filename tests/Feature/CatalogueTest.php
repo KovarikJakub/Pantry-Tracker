@@ -70,3 +70,78 @@ it('redirects a guest to the login page', function () {
     $this->get(route('households.catalogue', $household->id))
         ->assertRedirect(route('login'));
 });
+
+/**
+ * Gives the household a custom catalogue containing one category.
+ */
+function ownCategory(Household $household, string $name, ?Category $parent = null): Category
+{
+    $household->forceFill(['has_custom_categories' => true])->save();
+
+    return $household->categories()->create(['name' => $name, 'parent_id' => $parent?->id]);
+}
+
+it('lets a manager add a subcategory and reopens its parent', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $dairy = ownCategory($household, 'Dairy');
+
+    $this->withSession(['user_id' => $manager->id])
+        ->post(route('households.categories.store', $household->id), ['parent_id' => $dairy->id, 'name' => 'Cheese'])
+        ->assertRedirect(route('households.catalogue', $household->id))
+        ->assertSessionHas('opened_category_id', $dairy->id);
+
+    expect($dairy->children()->sole())
+        ->name->toBe('Cheese')
+        ->household_id->toBe($household->id);
+});
+
+it('copies the default tree before adding a subcategory, leaving the default tree untouched', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $defaultDairy = Category::query()->create(['name' => 'Dairy']);
+
+    $this->withSession(['user_id' => $manager->id])
+        ->post(route('households.categories.store', $household->id), ['parent_id' => $defaultDairy->id, 'name' => 'Cheese'])
+        ->assertRedirect(route('households.catalogue', $household->id));
+
+    $copiedDairy = $household->categories()->where('name', 'Dairy')->sole();
+
+    expect($household->fresh()->has_custom_categories)->toBeTrue()
+        ->and($defaultDairy->children()->exists())->toBeFalse()
+        ->and($copiedDairy->children()->sole()->name)->toBe('Cheese');
+});
+
+it('rejects a subcategory whose name is already used by a sibling', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $dairy = ownCategory($household, 'Dairy');
+    ownCategory($household, 'Cheese', $dairy);
+
+    $this->withSession(['user_id' => $manager->id])
+        ->post(route('households.categories.store', $household->id), ['parent_id' => $dairy->id, 'name' => 'Cheese'])
+        ->assertSessionHasErrors('name', errorBag: 'category');
+
+    expect($dairy->children()->count())->toBe(1);
+});
+
+it('rejects a parent category from another household', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $household->forceFill(['has_custom_categories' => true])->save();
+    [, $otherHousehold] = householdWithMember('manager');
+    $foreignCategory = ownCategory($otherHousehold, 'Foreign');
+
+    $this->withSession(['user_id' => $manager->id])
+        ->post(route('households.categories.store', $household->id), ['parent_id' => $foreignCategory->id, 'name' => 'Cheese'])
+        ->assertNotFound();
+
+    expect($foreignCategory->children()->exists())->toBeFalse();
+});
+
+it('forbids a regular member from adding a subcategory', function () {
+    [$member, $household] = householdWithMember('member');
+    $dairy = ownCategory($household, 'Dairy');
+
+    $this->withSession(['user_id' => $member->id])
+        ->post(route('households.categories.store', $household->id), ['parent_id' => $dairy->id, 'name' => 'Cheese'])
+        ->assertForbidden();
+
+    expect($dairy->children()->exists())->toBeFalse();
+});

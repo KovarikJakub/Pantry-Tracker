@@ -9,14 +9,17 @@ use App\Models\ProductCatalog;
 use App\Models\Shelf;
 use App\Models\User;
 use App\Services\Authenticator;
+use App\Services\CatalogCopier;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use phpDocumentor\Reflection\Types\Null_;
 
 class HouseholdController extends Controller
 {
@@ -90,11 +93,10 @@ class HouseholdController extends Controller
 
         $ownerId = $household->catalogueOwnerId();
 
-        $categoriesByParent = Category::query()
+        $categories = Category::query()
             ->where('household_id', $ownerId)
             ->orderBy('name')
-            ->get()
-            ->groupBy('parent_id');
+            ->get();
 
         $productsByCategory = ProductCatalog::query()
             ->where('household_id', $ownerId)
@@ -102,11 +104,99 @@ class HouseholdController extends Controller
             ->get()
             ->groupBy('category_id');
 
+        // After adding a subcategory (or failing to), reopen the branch the manager was working in.
+        $focusedCategoryId = session('opened_category_id') ?? old('parent_id');
+
         return view('household.catalogue', [
             'household' => $household,
-            'categoriesByParent' => $categoriesByParent,
+            'categoriesByParent' => $categories->groupBy('parent_id'),
             'productsByCategory' => $productsByCategory,
+            'openCategoryIds' => $this->categoryWithAncestorIds($categories->keyBy('id'), $focusedCategoryId),
         ]);
+    }
+
+    /**
+     * Adds a subcategory under one of the household's categories. Managers only.
+     * A household still using the default tree gets its own copy first, so the default tree is never changed.
+     */
+    public function addCategory(Request $request, Authenticator $authenticator, CatalogCopier $catalogCopier, string $id): RedirectResponse
+    {
+        $household = Household::query()->findOrFail($id);
+
+        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+
+        $validated = $request->validateWithBag('category', [
+            'parent_id' => ['required', 'uuid'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name')->where('parent_id', (string) $request->input('parent_id')),
+            ],
+        ], [
+            'name.unique' => 'This category already has a subcategory with that name.',
+        ]);
+
+        $parent = Category::query()
+            ->where('household_id', $household->catalogueOwnerId())
+            ->findOrFail($validated['parent_id']);
+
+        $parentId = DB::transaction(function () use ($household, $catalogCopier, $parent, $validated): string {
+            $copiedCategoryIds = $catalogCopier->copyDefaultTo($household);
+            $parentId = $copiedCategoryIds[$parent->id] ?? $parent->id;
+
+            $household->categories()->create([
+                'name' => $validated['name'],
+                'parent_id' => $parentId,
+            ]);
+
+            return $parentId;
+        });
+
+        return redirect()->route('households.catalogue', $household->id)
+            ->with('opened_category_id', $parentId);
+    }
+
+    public function deleteCategory(Request $request, Authenticator $authenticator, CatalogCopier $catalogCopier, string $id): RedirectResponse
+    {
+        $household = Household::query()->findOrFail($id);
+        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+
+        $validated = $request->validateWithBag('category', [
+            'target_id' => [
+                'required',
+                'string',
+            ],
+        ]);
+
+        DB::transaction(function () use ($household, $catalogCopier, $validated): string {
+            $catalogCopier->copyDefaultTo($household);
+
+            $household->categories()->delete([
+                'name' => $validated['target_id'],
+            ]);
+
+            return null;
+        });
+
+        return redirect()->route('households.catalogue', $household->id);
+    }
+
+    /**
+     * @param  Collection<string, Category>  $categoriesById
+     * @return list<string> the category's id followed by the ids of all its ancestors; empty if not found
+     */
+    private function categoryWithAncestorIds(Collection $categoriesById, ?string $categoryId): array
+    {
+        $ids = [];
+        $category = $categoryId === null ? null : $categoriesById->get($categoryId);
+
+        while ($category !== null) {
+            $ids[] = $category->id;
+            $category = $category->parent_id === null ? null : $categoriesById->get($category->parent_id);
+        }
+
+        return $ids;
     }
 
     /**

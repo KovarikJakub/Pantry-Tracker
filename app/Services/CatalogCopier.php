@@ -17,15 +17,17 @@ use Illuminate\Support\Facades\DB;
 class CatalogCopier
 {
     /**
-     * Does nothing if the household already has its own catalogue.
+     * Does nothing (and returns an empty map) if the household already has its own catalogue.
+     *
+     * @return array<string, string> default category id => copied category id
      */
-    public function copyDefaultTo(Household $household): void
+    public function copyDefaultTo(Household $household): array
     {
         if ($household->has_custom_categories) {
-            return;
+            return [];
         }
 
-        DB::transaction(function () use ($household): void {
+        return DB::transaction(function () use ($household): array {
             $defaultCategories = Category::query()->whereNull('household_id')->get()->groupBy('parent_id');
 
             /** @var array<string, string> $categoryIds default category id => copied category id */
@@ -57,6 +59,8 @@ class CatalogCopier
 
             $household->has_custom_categories = true;
             $household->save();
+
+            return $categoryIds;
         });
     }
 
