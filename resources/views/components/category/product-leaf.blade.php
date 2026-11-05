@@ -6,8 +6,9 @@
     <span class="text-xs text-stone-500">{{ (float) $product->default_size_g_ml }} {{ $product->measurement_unit }}</span>
     <span>Edit</span>
     <span>
-        <form method="POST" action="{{ route('household.products.remove', [$household->id, $product->id]) }}">
+        <form method="POST" action="{{ route('households.products.destroy', [$household->id, $product->id]) }}">
             @csrf
+            @method('DELETE')
             <button type="submit">Delete</button>
         </form>
     </span>

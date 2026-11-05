@@ -118,7 +118,7 @@ class HouseholdController extends Controller
      * Adds a subcategory under one of the household's categories. Managers only.
      * A household still using the default tree gets its own copy first, so the default tree is never changed.
      */
-    public function addCategory(Request $request, Authenticator $authenticator, CatalogCopier $catalogCopier, string $id): RedirectResponse
+    public function storeCategory(Request $request, Authenticator $authenticator, CatalogCopier $catalogCopier, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
@@ -160,7 +160,7 @@ class HouseholdController extends Controller
      * Hides a product from the household's catalogue (soft delete). Food items already made from it keep
      * referring to it. A household still using the default tree gets its own copy first. Managers only.
      */
-    public function deleteProduct(Authenticator $authenticator, CatalogCopier $catalogCopier, string $id, string $productId): RedirectResponse
+    public function destroyProduct(Authenticator $authenticator, CatalogCopier $catalogCopier, string $id, string $productId): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
@@ -203,7 +203,7 @@ class HouseholdController extends Controller
     /**
      * Adds an appliance to the household. Managers only.
      */
-    public function addAppliance(Request $request, Authenticator $authenticator, string $id): RedirectResponse
+    public function storeAppliance(Request $request, Authenticator $authenticator, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
@@ -225,7 +225,7 @@ class HouseholdController extends Controller
     /**
      * Adds a shelf at the end of one of the household's appliances. Managers only.
      */
-    public function addShelf(Request $request, Authenticator $authenticator, string $id, string $applianceId): RedirectResponse
+    public function storeShelf(Request $request, Authenticator $authenticator, string $id, string $applianceId): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
@@ -252,7 +252,7 @@ class HouseholdController extends Controller
      * Puts one item of a catalogue product on one of the household's shelves,
      * unless it would exceed the shelf's capacity. Members only.
      */
-    public function addFoodItem(Request $request, Authenticator $authenticator, string $id): RedirectResponse
+    public function storeFoodItem(Request $request, Authenticator $authenticator, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
         $userId = $authenticator->user()->id;
@@ -303,44 +303,58 @@ class HouseholdController extends Controller
     }
 
     /**
-     * Marks a stored food item of the household as consumed by the current user. Members only.
+     * Marks a stored food item of the household as consumed or thrown out by the current user,
+     * keeping it for the consumption history. Members only.
      */
-    public function removeFoodItem(Request $request, Authenticator $authenticator, string $id, string $foodItemId): RedirectResponse
+    public function updateFoodItem(Request $request, Authenticator $authenticator, string $id, string $foodItemId): RedirectResponse
     {
-        $action = $request->validate([
-            'action' => ['required', Rule::in(['consumed', 'thrown_out', 'removed'])],
-        ])['action'];
+        $status = $request->validate([
+            'status' => ['required', Rule::in(['consumed', 'thrown_out'])],
+        ])['status'];
 
         $household = Household::query()->findOrFail($id);
         $userId = $authenticator->user()->id;
 
         abort_unless($household->members()->where('user_id', $userId)->exists(), 403);
 
-        // find the food item
-        $foodItem = FoodItem::query()
-            ->whereHas('shelf.appliance', fn (Builder $appliances) => $appliances->where('household_id', $household->id))
-            ->where('status', 'stored')
-            ->findOrFail($foodItemId);
-
-        // The Food Item should be removed without any trace in DB:
-        if ($action === 'removed') {
-            $foodItem->delete();
-        } else {
-            // The Food item was either consumed or thrown out, but we want to keep track of it:
-            $foodItem->update([
-                'status' => $action,
-                'removed_at' => now(),
-                'resolved_by_user_id' => $userId,
-            ]);
-        }
+        $this->storedFoodItemOf($household, $foodItemId)->update([
+            'status' => $status,
+            'removed_at' => now(),
+            'resolved_by_user_id' => $userId,
+        ]);
 
         return redirect()->route('households.show', $household->id);
     }
 
     /**
+     * Deletes a stored food item of the household without a trace, e.g. one added by mistake. Members only.
+     */
+    public function destroyFoodItem(Authenticator $authenticator, string $id, string $foodItemId): RedirectResponse
+    {
+        $household = Household::query()->findOrFail($id);
+
+        abort_unless($household->members()->where('user_id', $authenticator->user()->id)->exists(), 403);
+
+        $this->storedFoodItemOf($household, $foodItemId)->delete();
+
+        return redirect()->route('households.show', $household->id);
+    }
+
+    /**
+     * Finds a food item that is still stored on one of the household's shelves.
+     */
+    private function storedFoodItemOf(Household $household, string $foodItemId): FoodItem
+    {
+        return FoodItem::query()
+            ->whereHas('shelf.appliance', fn (Builder $appliances) => $appliances->where('household_id', $household->id))
+            ->where('status', 'stored')
+            ->findOrFail($foodItemId);
+    }
+
+    /**
      * Adds an existing user, found by email, to the household. Managers only.
      */
-    public function addMember(Request $request, Authenticator $authenticator, string $id): RedirectResponse
+    public function storeMember(Request $request, Authenticator $authenticator, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 

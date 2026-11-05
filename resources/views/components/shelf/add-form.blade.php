@@ -2,7 +2,7 @@
 
 @php($shelfErrors = $errors->getBag('shelf_'.$appliance->id))
 
-<form method="POST" action="{{ route('households.shelves.store', [$household->id, $appliance->id]) }}" class="mt-2 flex flex-wrap items-end gap-2">
+<form method="POST" action="{{ route('households.appliances.shelves.store', [$household->id, $appliance->id]) }}" class="mt-2 flex flex-wrap items-end gap-2">
     @csrf
 
     <input name="label" type="text" placeholder="Shelf label" required class="border p-2">

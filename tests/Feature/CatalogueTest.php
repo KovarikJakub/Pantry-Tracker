@@ -2,30 +2,6 @@
 
 use App\Models\Category;
 use App\Models\Household;
-use App\Models\ProductCatalog;
-
-/**
- * Creates a product with placeholder nutrition values.
- */
-function catalogueProduct(Category $category, string $name, ?Household $household = null): ProductCatalog
-{
-    $product = new ProductCatalog([
-        'category_id' => $category->id,
-        'barcode' => fake()->unique()->ean13(),
-        'name' => $name,
-        'default_size_g_ml' => 500,
-        'measurement_unit' => 'g',
-        'calories_per_100g' => 100,
-        'protein_per_100g' => 1,
-        'fat_per_100g' => 1,
-        'carbs_per_100g' => 1,
-        'fiber_per_100g' => 0,
-    ]);
-    $product->household_id = $household?->id;
-    $product->save();
-
-    return $product;
-}
 
 it('shows the default category tree with nested subcategories and products to a manager', function () {
     [$manager, $household] = householdWithMember('manager');
@@ -163,7 +139,7 @@ it('hides a deleted product but keeps it for food items made from it', function 
     ]);
 
     $this->withSession(['user_id' => $manager->id])
-        ->post(route('household.products.remove', [$household->id, $product->id]))
+        ->delete(route('households.products.destroy', [$household->id, $product->id]))
         ->assertRedirect(route('households.catalogue', $household->id))
         ->assertSessionHas('opened_category_id', $dairy->id);
 
@@ -180,7 +156,7 @@ it('deletes the household copy of a default product, leaving the global product 
     $globalProduct = catalogueProduct(Category::query()->create(['name' => 'Dairy']), 'Cheddar');
 
     $this->withSession(['user_id' => $manager->id])
-        ->post(route('household.products.remove', [$household->id, $globalProduct->id]))
+        ->delete(route('households.products.destroy', [$household->id, $globalProduct->id]))
         ->assertRedirect(route('households.catalogue', $household->id));
 
     expect($globalProduct->fresh()->trashed())->toBeFalse()
@@ -194,7 +170,7 @@ it('rejects deleting a product from another household', function () {
     $foreignProduct = catalogueProduct(ownCategory($otherHousehold, 'Foreign'), 'Cheddar', $otherHousehold);
 
     $this->withSession(['user_id' => $manager->id])
-        ->post(route('household.products.remove', [$household->id, $foreignProduct->id]))
+        ->delete(route('households.products.destroy', [$household->id, $foreignProduct->id]))
         ->assertNotFound();
 
     expect($foreignProduct->fresh()->trashed())->toBeFalse();
@@ -205,7 +181,7 @@ it('forbids a regular member from deleting a product', function () {
     $product = catalogueProduct(ownCategory($household, 'Dairy'), 'Cheddar', $household);
 
     $this->withSession(['user_id' => $member->id])
-        ->post(route('household.products.remove', [$household->id, $product->id]))
+        ->delete(route('households.products.destroy', [$household->id, $product->id]))
         ->assertForbidden();
 
     expect($product->fresh()->trashed())->toBeFalse();

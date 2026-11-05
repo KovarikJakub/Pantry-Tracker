@@ -21,14 +21,19 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::post('/logout', LogoutController::class)->name('logout');
     Route::view('/admin', 'admin')->middleware(AuthenticateAdmin::class)->name('admin');
     Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
-    Route::get('/households/{id}', [HouseholdController::class, 'show'])->whereUuid('id')->name('households.show');
-    Route::get('/households/{id}/catalogue', [HouseholdController::class, 'catalogue'])->whereUuid('id')->name('households.catalogue');
-    Route::post('/households/{id}/categories', [HouseholdController::class, 'addCategory'])->whereUuid('id')->name('households.categories.store');
     Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
-    Route::post('/households/{id}/members', [HouseholdController::class, 'addMember'])->whereUuid('id')->name('households.members.store');
-    Route::post('/households/{id}/appliances', [HouseholdController::class, 'addAppliance'])->whereUuid('id')->name('households.appliances.store');
-    Route::post('/households/{id}/appliances/{applianceId}/shelves', [HouseholdController::class, 'addShelf'])->whereUuid(['id', 'applianceId'])->name('households.shelves.store');
-    Route::post('/households/{id}/food-items', [HouseholdController::class, 'addFoodItem'])->whereUuid('id')->name('households.food-items.store');
-    Route::post('/households/{id}/food-items/remove/{foodItemId}', [HouseholdController::class, 'removeFoodItem'])->whereUuid(['id', 'foodItemId'])->name('household.food-items.remove');
-    Route::post('/households/{id}/products/remove/{productId}', [HouseholdController::class, 'deleteProduct'])->whereUuid(['id', 'productId'])->name('household.products.remove');
+    Route::get('/households/{id}', [HouseholdController::class, 'show'])->whereUuid('id')->name('households.show');
+
+    Route::post('/households/{id}/members', [HouseholdController::class, 'storeMember'])->whereUuid('id')->name('households.members.store');
+
+    Route::post('/households/{id}/appliances', [HouseholdController::class, 'storeAppliance'])->whereUuid('id')->name('households.appliances.store');
+    Route::post('/households/{id}/appliances/{applianceId}/shelves', [HouseholdController::class, 'storeShelf'])->whereUuid(['id', 'applianceId'])->name('households.appliances.shelves.store');
+
+    Route::post('/households/{id}/food-items', [HouseholdController::class, 'storeFoodItem'])->whereUuid('id')->name('households.food-items.store');
+    Route::patch('/households/{id}/food-items/{foodItemId}', [HouseholdController::class, 'updateFoodItem'])->whereUuid(['id', 'foodItemId'])->name('households.food-items.update');
+    Route::delete('/households/{id}/food-items/{foodItemId}', [HouseholdController::class, 'destroyFoodItem'])->whereUuid(['id', 'foodItemId'])->name('households.food-items.destroy');
+
+    Route::get('/households/{id}/catalogue', [HouseholdController::class, 'catalogue'])->whereUuid('id')->name('households.catalogue');
+    Route::post('/households/{id}/categories', [HouseholdController::class, 'storeCategory'])->whereUuid('id')->name('households.categories.store');
+    Route::delete('/households/{id}/products/{productId}', [HouseholdController::class, 'destroyProduct'])->whereUuid(['id', 'productId'])->name('households.products.destroy');
 });
