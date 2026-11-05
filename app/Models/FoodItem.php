@@ -48,11 +48,13 @@ class FoodItem extends Model
     }
 
     /**
+     * Includes deleted products, so items already on shelves or in history still show their product.
+     *
      * @return BelongsTo<ProductCatalog, $this>
      */
     public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductCatalog::class, 'product_id');
+        return $this->belongsTo(ProductCatalog::class, 'product_id')->withTrashed();
     }
 
     /**

@@ -37,7 +37,7 @@
             @endforeach
 
             @foreach ($products as $product)
-                <x-category.product-leaf :product="$product" />
+                <x-category.product-leaf :household="$household" :product="$product" />
             @endforeach
         </ul>
     </details>

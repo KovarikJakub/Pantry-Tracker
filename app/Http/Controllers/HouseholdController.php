@@ -19,7 +19,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use phpDocumentor\Reflection\Types\Null_;
 
 class HouseholdController extends Controller
 {
@@ -142,7 +141,7 @@ class HouseholdController extends Controller
             ->findOrFail($validated['parent_id']);
 
         $parentId = DB::transaction(function () use ($household, $catalogCopier, $parent, $validated): string {
-            $copiedCategoryIds = $catalogCopier->copyDefaultTo($household);
+            $copiedCategoryIds = $catalogCopier->copyDefaultTo($household)['categoryIds'];
             $parentId = $copiedCategoryIds[$parent->id] ?? $parent->id;
 
             $household->categories()->create([
@@ -157,29 +156,31 @@ class HouseholdController extends Controller
             ->with('opened_category_id', $parentId);
     }
 
-    public function deleteCategory(Request $request, Authenticator $authenticator, CatalogCopier $catalogCopier, string $id): RedirectResponse
+    /**
+     * Hides a product from the household's catalogue (soft delete). Food items already made from it keep
+     * referring to it. A household still using the default tree gets its own copy first. Managers only.
+     */
+    public function deleteProduct(Authenticator $authenticator, CatalogCopier $catalogCopier, string $id, string $productId): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
+
         abort_unless($household->isManagedBy($authenticator->user()->id), 403);
 
-        $validated = $request->validateWithBag('category', [
-            'target_id' => [
-                'required',
-                'string',
-            ],
-        ]);
+        $product = ProductCatalog::query()
+            ->where('household_id', $household->catalogueOwnerId())
+            ->findOrFail($productId);
 
-        DB::transaction(function () use ($household, $catalogCopier, $validated): string {
-            $catalogCopier->copyDefaultTo($household);
+        $categoryId = DB::transaction(function () use ($household, $catalogCopier, $product): string {
+            $copiedProductIds = $catalogCopier->copyDefaultTo($household)['productIds'];
+            $householdProduct = $household->products()->findOrFail($copiedProductIds[$product->id] ?? $product->id);
 
-            $household->categories()->delete([
-                'name' => $validated['target_id'],
-            ]);
+            $householdProduct->delete();
 
-            return null;
+            return $householdProduct->category_id;
         });
 
-        return redirect()->route('households.catalogue', $household->id);
+        return redirect()->route('households.catalogue', $household->id)
+            ->with('opened_category_id', $categoryId);
     }
 
     /**

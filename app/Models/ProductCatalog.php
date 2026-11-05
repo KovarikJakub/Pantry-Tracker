@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A product that food items are instances of. A NULL household_id means the product is global.
+ * Deleting is soft: the product disappears from the catalogue but its food items keep referring to it.
  */
 class ProductCatalog extends Model
 {
     /** @use HasFactory<ProductCatalogFactory> */
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'product_catalogs';
 
