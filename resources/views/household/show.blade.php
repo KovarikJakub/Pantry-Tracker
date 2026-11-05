@@ -2,6 +2,7 @@
     <h1 class="text-2xl font-semibold">{{ $household->name }}</h1>
 
     @if ($isManager)
+        <a href="{{ route('households.catalogue', $household->id) }}" class="mt-2 inline-block underline">Manage category catalogue</a>
         <x-household.add-member-form :household="$household" />
         <x-appliance.add-form :household="$household" />
     @endif

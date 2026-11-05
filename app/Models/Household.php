@@ -57,6 +57,15 @@ class Household extends Model
         return $this->hasMany(ProductCatalog::class);
     }
 
+    /**
+     * The household_id of the catalogue rows this household uses: its own once it has a custom catalogue,
+     * otherwise NULL (the default tree and global products).
+     */
+    public function catalogueOwnerId(): ?string
+    {
+        return $this->has_custom_categories ? $this->id : null;
+    }
+
     public function isManagedBy(string $userId): bool
     {
         return $this->members()->where('user_id', $userId)->where('role', 'manager')->exists();

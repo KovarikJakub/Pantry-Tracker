@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\FoodItem;
 use App\Models\Household;
 use App\Models\ProductCatalog;
@@ -75,6 +76,36 @@ class HouseholdController extends Controller
         return view('household.show', [
             'household' => $household,
             'isManager' => $household->isManagedBy($userId),
+        ]);
+    }
+
+    /**
+     * Shows the household's category tree with its products. Managers only.
+     */
+    public function catalogue(string $id, Authenticator $authenticator): View
+    {
+        $household = Household::query()->findOrFail($id);
+
+        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+
+        $ownerId = $household->catalogueOwnerId();
+
+        $categoriesByParent = Category::query()
+            ->where('household_id', $ownerId)
+            ->orderBy('name')
+            ->get()
+            ->groupBy('parent_id');
+
+        $productsByCategory = ProductCatalog::query()
+            ->where('household_id', $ownerId)
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category_id');
+
+        return view('household.catalogue', [
+            'household' => $household,
+            'categoriesByParent' => $categoriesByParent,
+            'productsByCategory' => $productsByCategory,
         ]);
     }
 
@@ -201,11 +232,9 @@ class HouseholdController extends Controller
             ->findOrFail($foodItemId);
 
         // The Food Item should be removed without any trace in DB:
-        if($action === 'removed')
-        {
+        if ($action === 'removed') {
             $foodItem->delete();
-        }
-        else {
+        } else {
             // The Food item was either consumed or thrown out, but we want to keep track of it:
             $foodItem->update([
                 'status' => $action,
