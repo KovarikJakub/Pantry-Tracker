@@ -5,20 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Household;
 use App\Models\ProductCatalog;
-use App\Services\Authenticator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 
 class CatalogueController extends Controller
 {
     /**
      * Shows the household's category tree with its products. Managers only.
      */
-    public function show(string $id, Authenticator $authenticator): View
+    public function show(string $id): View
     {
         $household = Household::query()->findOrFail($id);
 
-        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+        Gate::authorize('manage', $household);
 
         $ownerId = $household->catalogueOwnerId();
 

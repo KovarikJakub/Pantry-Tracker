@@ -6,11 +6,11 @@ use App\Models\FoodItem;
 use App\Models\Household;
 use App\Models\ProductCatalog;
 use App\Models\Shelf;
-use App\Services\Authenticator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -20,12 +20,12 @@ class FoodItemController extends Controller
      * Puts one item of a catalogue product on one of the household's shelves,
      * unless it would exceed the shelf's capacity. Members only.
      */
-    public function store(Request $request, Authenticator $authenticator, string $id): RedirectResponse
+    public function store(Request $request, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
-        $userId = $authenticator->user()->id;
+        $userId = $request->user()->id;
 
-        abort_unless($household->members()->where('user_id', $userId)->exists(), 403);
+        Gate::authorize('view', $household);
 
         $validated = $request->validateWithBag('foodItem', [
             'shelf_id' => ['required', 'uuid'],
@@ -74,16 +74,16 @@ class FoodItemController extends Controller
      * Marks a stored food item of the household as consumed or thrown out by the current user,
      * keeping it for the consumption history. Members only.
      */
-    public function update(Request $request, Authenticator $authenticator, string $id, string $foodItemId): RedirectResponse
+    public function update(Request $request, string $id, string $foodItemId): RedirectResponse
     {
         $status = $request->validate([
             'status' => ['required', Rule::in(['consumed', 'thrown_out'])],
         ])['status'];
 
         $household = Household::query()->findOrFail($id);
-        $userId = $authenticator->user()->id;
+        $userId = $request->user()->id;
 
-        abort_unless($household->members()->where('user_id', $userId)->exists(), 403);
+        Gate::authorize('view', $household);
 
         $this->storedFoodItemOf($household, $foodItemId)->update([
             'status' => $status,
@@ -97,11 +97,11 @@ class FoodItemController extends Controller
     /**
      * Deletes a stored food item of the household without a trace, e.g. one added by mistake. Members only.
      */
-    public function destroy(Authenticator $authenticator, string $id, string $foodItemId): RedirectResponse
+    public function destroy(string $id, string $foodItemId): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
-        abort_unless($household->members()->where('user_id', $authenticator->user()->id)->exists(), 403);
+        Gate::authorize('view', $household);
 
         $this->storedFoodItemOf($household, $foodItemId)->delete();
 

@@ -13,6 +13,7 @@ it('lets a manager add an appliance', function () {
 
     $this->withSession(['user_id' => $manager->id])
         ->get(route('households.show', $household->id))
+        ->assertOk()
         ->assertSee('Kitchen Fridge');
 });
 

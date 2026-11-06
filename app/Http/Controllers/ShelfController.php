@@ -3,20 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Household;
-use App\Services\Authenticator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ShelfController extends Controller
 {
     /**
      * Adds a shelf at the end of one of the household's appliances. Managers only.
      */
-    public function store(Request $request, Authenticator $authenticator, string $id, string $applianceId): RedirectResponse
+    public function store(Request $request, string $id, string $applianceId): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
-        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+        Gate::authorize('manage', $household);
 
         $appliance = $household->appliances()->findOrFail($applianceId);
 

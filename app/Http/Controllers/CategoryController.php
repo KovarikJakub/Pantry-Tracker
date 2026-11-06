@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Household;
-use App\Services\Authenticator;
 use App\Services\CatalogCopier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
@@ -17,11 +17,11 @@ class CategoryController extends Controller
      * Adds a subcategory under one of the household's categories. Managers only.
      * A household still using the default tree gets its own copy first, so the default tree is never changed.
      */
-    public function store(Request $request, Authenticator $authenticator, CatalogCopier $catalogCopier, string $id): RedirectResponse
+    public function store(Request $request, CatalogCopier $catalogCopier, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
-        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+        Gate::authorize('manage', $household);
 
         $validated = $request->validateWithBag('category', [
             'parent_id' => ['required', 'uuid'],

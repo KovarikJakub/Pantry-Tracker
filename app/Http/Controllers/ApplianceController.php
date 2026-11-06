@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Household;
-use App\Services\Authenticator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class ApplianceController extends Controller
@@ -13,11 +13,11 @@ class ApplianceController extends Controller
     /**
      * Adds an appliance to the household. Managers only.
      */
-    public function store(Request $request, Authenticator $authenticator, string $id): RedirectResponse
+    public function store(Request $request, string $id): RedirectResponse
     {
         $household = Household::query()->findOrFail($id);
 
-        abort_unless($household->isManagedBy($authenticator->user()->id), 403);
+        Gate::authorize('manage', $household);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
