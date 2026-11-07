@@ -19,6 +19,11 @@
                 class="invisible ml-auto text-xs underline group-hover/row:visible focus:visible"
                 @click.prevent="adding = true; $el.closest('details').open = true"
             >+ Add subcategory</button>
+            <button
+                type="button"
+                class="invisible text-xs underline group-hover/row:visible focus:visible"
+                @click.prevent="$dispatch('open-add-product', @js(['id' => $category->id, 'name' => $category->name]))"
+            >+ Add product</button>
         </summary>
 
         <ul class="ml-3 border-l border-stone-200 pl-3">

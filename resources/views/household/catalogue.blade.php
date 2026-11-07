@@ -8,5 +8,10 @@
         :open-category-ids="$openCategoryIds"
     />
 
+    <x-product.add-dialog
+        :household="$household"
+        :category-names="$categoriesByParent->flatten(1)->pluck('name', 'id')"
+    />
+
     <a href="{{ route('households.show', $household->id) }}" class="mt-4 inline-block underline">Back to household</a>
 </x-layouts::app>
