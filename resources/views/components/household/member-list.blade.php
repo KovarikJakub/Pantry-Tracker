@@ -1,4 +1,4 @@
-@props(['members'])
+@props(['household', 'members'])
 
 {{-- Household members as cards: initials avatar, name, email, role badge and join date. Managers first. --}}
 
@@ -14,6 +14,10 @@
     <h2 id="members-title" class="mb-3 text-lg font-semibold">
         Members <span class="text-sm font-normal text-stone-500">({{ $members->count() }})</span>
     </h2>
+
+    @error('member', 'memberRemove')
+        <p role="alert" class="mb-2 text-red-600">{{ $message }}</p>
+    @enderror
 
     <ul class="divide-y divide-stone-200 border border-stone-200 bg-white">
         @foreach ($sortedMembers as $member)
@@ -42,6 +46,14 @@
                     <p class="mt-1 text-xs text-stone-500">
                         Joined {{ \Illuminate\Support\Carbon::parse($member->pivot->joined_at)->toFormattedDateString() }}
                     </p>
+                </div>
+
+                <div @class(['invisible' => $isManager])>
+                    <form method="POST" action="{{ route('households.members.destroy', [$household->id, $member->id]) }}" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit">Remove</button>
+                    </form>
                 </div>
             </li>
         @endforeach

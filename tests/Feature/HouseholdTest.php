@@ -63,3 +63,29 @@ it('lists the household members with their roles on the members tab', function (
         ->assertSee($manager->email)
         ->assertSee('Manager');
 });
+
+it('lets a manager remove a regular member but not a manager', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $member = User::factory()->create();
+    $household->members()->create(['user_id' => $member->id, 'role' => 'member', 'joined_at' => now()]);
+
+    $this->withSession(['user_id' => $manager->id])
+        ->delete(route('households.members.destroy', [$household->id, $member->id]))
+        ->assertRedirect(route('households.members.index', $household->id));
+
+    $this->withSession(['user_id' => $manager->id])
+        ->delete(route('households.members.destroy', [$household->id, $manager->id]))
+        ->assertSessionHasErrors('member', null, 'memberRemove');
+
+    expect($household->memberUsers()->pluck('users.id')->all())->toBe([$manager->id]);
+});
+
+it('forbids a regular member from removing members', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $member = User::factory()->create();
+    $household->members()->create(['user_id' => $member->id, 'role' => 'member', 'joined_at' => now()]);
+
+    $this->withSession(['user_id' => $member->id])
+        ->delete(route('households.members.destroy', [$household->id, $member->id]))
+        ->assertForbidden();
+});
