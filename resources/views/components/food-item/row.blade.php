@@ -3,7 +3,7 @@
 <tr>
     <td class="border p-2">{{ $foodItem->product->name }}</td>
     <td class="border p-2">{{ (float) $foodItem->weight_volume }} {{ $foodItem->product->measurement_unit }}</td>
-    <td class="border p-2">{{ $foodItem->expiration_date->format('Y-m-d') }}</td>
+    <td class="border p-2"><x-food-item.expiry-tag :expiry-date="$foodItem->expiration_date" /></td>
     <td class="border p-2">
         <form method="POST" action="{{ route('households.food-items.update', [$household->id, $foodItem->id]) }}" class="inline">
             @csrf
