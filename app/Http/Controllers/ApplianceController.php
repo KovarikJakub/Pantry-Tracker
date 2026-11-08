@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Household;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -10,6 +11,20 @@ use Illuminate\Validation\Rule;
 
 class ApplianceController extends Controller
 {
+    /**
+     * Shows the household's appliances tab, where appliances and shelves are added. Managers only.
+     */
+    public function index(string $id): View
+    {
+        $household = Household::query()->findOrFail($id);
+
+        Gate::authorize('manage', $household);
+
+        $household->load('appliances.shelves');
+
+        return view('household.appliances', ['household' => $household]);
+    }
+
     /**
      * Adds an appliance to the household. Managers only.
      */
@@ -29,6 +44,6 @@ class ApplianceController extends Controller
             'appliance_type' => $validated['appliance_type'],
         ]);
 
-        return redirect()->route('households.show', $household->id);
+        return redirect()->route('households.appliances.index', $household->id);
     }
 }

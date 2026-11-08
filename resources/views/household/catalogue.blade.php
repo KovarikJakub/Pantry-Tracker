@@ -1,6 +1,4 @@
-<x-layouts::app :title="$household->name.' catalogue'">
-    <h1 class="text-2xl font-semibold">{{ $household->name }} – category catalogue</h1>
-
+<x-household.layout :household="$household" title="Catalogue">
     @error('category_id', 'categoryDelete')
         <p role="alert" class="my-2 text-red-600">{{ $message }}</p>
     @enderror
@@ -16,6 +14,4 @@
         :household="$household"
         :category-names="$categoriesByParent->flatten(1)->pluck('name', 'id')"
     />
-
-    <a href="{{ route('households.show', $household->id) }}" class="mt-4 inline-block underline">Back to household</a>
-</x-layouts::app>
+</x-household.layout>

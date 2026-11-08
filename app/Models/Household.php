@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Household extends Model
@@ -24,10 +25,23 @@ class Household extends Model
 
     /**
      * @return HasMany<HouseholdMember, $this>
+     *
+     * @note just 1:N relation to the intermediate table, does not contain members "user" table info like name, email, etc.
      */
     public function members(): HasMany
     {
         return $this->hasMany(HouseholdMember::class);
+    }
+
+    /**
+     * @return BelongsToMany<User, $this>
+     *
+     * @note M:N relation with the User table, contains User table info like name, email, etc.
+     */
+    public function memberUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'household_members')
+            ->withPivot('role', 'joined_at');
     }
 
     /**

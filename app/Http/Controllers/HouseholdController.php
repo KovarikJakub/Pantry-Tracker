@@ -63,6 +63,7 @@ class HouseholdController extends Controller
         $household->load([
             'appliances.shelves.foodItems' => fn ($items) => $items->where('status', 'stored'),
             'appliances.shelves.foodItems.product',
+            'memberUsers',
         ]);
 
         $categories = $household->catalogueCategories()->orderBy('name')->get();

@@ -32,6 +32,6 @@ class ShelfController extends Controller
             'max_load_capacity_g' => $validated['max_load_capacity_g'],
         ]);
 
-        return redirect()->route('households.show', $household->id);
+        return redirect()->route('households.appliances.index', $household->id);
     }
 }

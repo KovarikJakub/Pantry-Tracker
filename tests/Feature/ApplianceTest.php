@@ -5,7 +5,7 @@ it('lets a manager add an appliance', function () {
 
     $this->withSession(['user_id' => $manager->id])
         ->post(route('households.appliances.store', $household->id), ['name' => 'Kitchen Fridge', 'appliance_type' => 'fridge'])
-        ->assertRedirect(route('households.show', $household->id));
+        ->assertRedirect(route('households.appliances.index', $household->id));
 
     expect($household->appliances()->sole())
         ->name->toBe('Kitchen Fridge')
