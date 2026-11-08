@@ -4,12 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Household;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class HouseholdMemberController extends Controller
 {
+    /**
+     * Shows the household's members tab. Managers only.
+     */
+    public function index(string $id): View
+    {
+        $household = Household::query()->findOrFail($id);
+
+        Gate::authorize('manage', $household);
+
+        return view('household.members', ['household' => $household]);
+    }
+
     /**
      * Adds an existing user, found by email, to the household. Managers only.
      */
@@ -34,6 +47,6 @@ class HouseholdMemberController extends Controller
             $status = 'User was added.';
         }
 
-        return redirect()->route('households.show', $household->id)->with('status', $status);
+        return redirect()->route('households.members.index', $household->id)->with('status', $status);
     }
 }

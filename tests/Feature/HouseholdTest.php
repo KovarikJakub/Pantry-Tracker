@@ -9,7 +9,7 @@ it('shows the manager tools to a manager', function () {
     $this->withSession(['user_id' => $manager->id])
         ->get(route('households.show', $household->id))
         ->assertOk()
-        ->assertSee('Manage category catalogue');
+        ->assertSee(route('households.catalogue', $household->id));
 });
 
 it('hides the manager tools from a regular member', function () {
@@ -18,7 +18,7 @@ it('hides the manager tools from a regular member', function () {
     $this->withSession(['user_id' => $member->id])
         ->get(route('households.show', $household->id))
         ->assertOk()
-        ->assertDontSee('Manage category catalogue');
+        ->assertDontSee(route('households.catalogue', $household->id));
 });
 
 it('forbids a non-member from viewing the household', function () {
@@ -43,3 +43,12 @@ it('offers the default catalogue in the add food modal to a household without it
         ->assertSee('Yoghurts')
         ->assertSee('Greek yoghurt');
 });
+
+it('opens the manager tabs only for a manager', function (string $routeName) {
+    [$manager, $household] = householdWithMember('manager');
+    $member = User::factory()->create();
+    $household->members()->create(['user_id' => $member->id, 'role' => 'member', 'joined_at' => now()]);
+
+    $this->withSession(['user_id' => $manager->id])->get(route($routeName, $household->id))->assertOk();
+    $this->withSession(['user_id' => $member->id])->get(route($routeName, $household->id))->assertForbidden();
+})->with(['households.members.index', 'households.appliances.index', 'households.catalogue']);
