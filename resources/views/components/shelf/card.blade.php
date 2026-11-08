@@ -10,7 +10,11 @@
                     <input type="radio" name="shelf_id" value="{{ $shelf->id }}" form="add-food-item" required @checked(old('shelf_id') === $shelf->id)>
                     {{ $shelf->label }}
                 </label>
-                <span class="float-right font-normal">{{ (float) $items->sum('weight_volume') }} / {{ (float) $shelf->max_load_capacity_g }} g</span>
+                <x-shelf.capacity-bar
+                    class="float-right"
+                    :current-weight="$items->sum('weight_volume')"
+                    :max-weight="$shelf->max_load_capacity_g"
+                />
             </th>
         </tr>
     </thead>
