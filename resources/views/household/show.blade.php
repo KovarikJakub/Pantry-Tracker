@@ -7,8 +7,14 @@
         <x-appliance.add-form :household="$household" />
     @endcan
 
-    <x-food-item.add-form :household="$household" />
-    <x-product.catalog :products="$household->products" />
+    @if (session('food_item_status'))
+        <p class="mt-4">{{ session('food_item_status') }}</p>
+    @endif
+
+    <x-food-item.add-dialog
+        :household="$household"
+        :shelf-labels="$household->appliances->flatMap->shelves->pluck('label', 'id')"
+    />
 
     <x-appliance.list :household="$household" />
 

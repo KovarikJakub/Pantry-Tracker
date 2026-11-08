@@ -1,6 +1,6 @@
 @props(['products'])
 
-<div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 border-2 px-2 py-2">
+<div class="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto border-2 px-2 py-2 sm:grid-cols-4">
     @foreach($products as $product)
         <x-product.card :product="$product" />
     @endforeach

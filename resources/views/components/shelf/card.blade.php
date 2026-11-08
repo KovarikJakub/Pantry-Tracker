@@ -6,10 +6,13 @@
     <thead>
         <tr class="bg-stone-100">
             <th colspan="3" class="border p-2 text-left">
-                <label>
-                    <input type="radio" name="shelf_id" value="{{ $shelf->id }}" form="add-food-item" required @checked(old('shelf_id') === $shelf->id)>
-                    {{ $shelf->label }}
-                </label>
+                {{ $shelf->label }}
+                <button
+                    type="button"
+                    x-data
+                    class="ml-2 text-xs font-normal underline"
+                    @click="$dispatch('open-add-food', @js(['id' => $shelf->id, 'label' => $shelf->label]))"
+                >+ Add food</button>
                 <x-shelf.capacity-bar
                     class="float-right"
                     :current-weight="$items->sum('weight_volume')"
