@@ -1,6 +1,10 @@
 <x-layouts::app :title="$household->name.' catalogue'">
     <h1 class="text-2xl font-semibold">{{ $household->name }} – category catalogue</h1>
 
+    @error('category_id', 'categoryDelete')
+        <p role="alert" class="my-2 text-red-600">{{ $message }}</p>
+    @enderror
+
     <x-category.tree
         :household="$household"
         :categories-by-parent="$categoriesByParent"

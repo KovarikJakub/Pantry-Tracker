@@ -24,6 +24,18 @@
                 class="invisible text-xs underline group-hover/row:visible focus:visible"
                 @click.prevent="$dispatch('open-add-product', @js(['id' => $category->id, 'name' => $category->name]))"
             >+ Add product</button>
+            @if ($childCount === 0)
+                <form
+                    method="POST"
+                    action="{{ route('households.categories.destroy', [$household->id, $category->id]) }}"
+                    class="contents"
+                    onsubmit="return confirm(@js('Delete category “'.$category->name.'”?'))"
+                >
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="invisible text-xs text-red-700 underline group-hover/row:visible focus:visible">Delete</button>
+                </form>
+            @endif
         </summary>
 
         <ul class="ml-3 border-l border-stone-200 pl-3">

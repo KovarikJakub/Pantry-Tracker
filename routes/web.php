@@ -42,6 +42,7 @@ Route::middleware(Authenticate::class)->group(function () {
 
     Route::get('/households/{id}/catalogue', [CatalogueController::class, 'show'])->whereUuid('id')->name('households.catalogue');
     Route::post('/households/{id}/categories', [CategoryController::class, 'store'])->whereUuid('id')->name('households.categories.store');
+    Route::delete('/households/{id}/categories/{categoryId}', [CategoryController::class, 'destroy'])->whereUuid(['id', 'categoryId'])->name('households.categories.destroy');
 
     Route::delete('/households/{id}/products/{productId}', [ProductController::class, 'destroy'])->whereUuid(['id', 'productId'])->name('households.products.destroy');
     Route::post('/households/{id}/products', [ProductController::class, 'store'])->whereUuid('id')->name('households.products.store');

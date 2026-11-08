@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CategoryController extends Controller
 {
@@ -29,7 +30,9 @@ class CategoryController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name')->where('parent_id', (string) $request->input('parent_id')),
+                Rule::unique('categories', 'name')
+                    ->where('parent_id', (string) $request->input('parent_id'))
+                    ->whereNull('deleted_at'),
             ],
         ], [
             'name.unique' => 'This category already has a subcategory with that name.',
@@ -52,6 +55,43 @@ class CategoryController extends Controller
         });
 
         return redirect()->route('households.catalogue', $household->id)
+            ->with('opened_category_id', $parentId);
+    }
+
+    /**
+     * Removes an empty category from the household's catalogue. Managers only.
+     */
+    public function destroy(string $id, CatalogCopier $catalogCopier, string $categoryId): RedirectResponse
+    {
+        $household = Household::query()->findOrFail($id);
+
+        Gate::authorize('manage', $household);
+
+        $category = Category::query()
+            ->where('household_id', $household->catalogueOwnerId())
+            ->findOrFail($categoryId);
+
+        $parentId = DB::transaction(function () use ($household, $catalogCopier, $category): ?string {
+            $copiedCategoryIds = $catalogCopier->copyDefaultTo($household)['categoryIds'];
+            $categoryToDeleteId = $copiedCategoryIds[$category->id] ?? $category->id;
+
+            $oldParentId = $category->parent_id;
+            $parentId = $copiedCategoryIds[$oldParentId] ?? $oldParentId;
+
+            $target = $household->categories()->findOrFail($categoryToDeleteId);
+
+            if ($target->products()->exists() || $target->children()->exists()) {
+                throw ValidationException::withMessages([
+                    'category_id' => "Category {$category->name} must be empty in order to be deleted.",
+                ])->errorBag('categoryDelete');
+            }
+
+            $target->delete();
+
+            return $parentId;
+        });
+
+        return redirect()->route('households.catalogue', $id)
             ->with('opened_category_id', $parentId);
     }
 }
