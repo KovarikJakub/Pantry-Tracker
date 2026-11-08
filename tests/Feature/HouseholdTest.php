@@ -52,3 +52,14 @@ it('opens the manager tabs only for a manager', function (string $routeName) {
     $this->withSession(['user_id' => $manager->id])->get(route($routeName, $household->id))->assertOk();
     $this->withSession(['user_id' => $member->id])->get(route($routeName, $household->id))->assertForbidden();
 })->with(['households.members.index', 'households.appliances.index', 'households.catalogue']);
+
+it('lists the household members with their roles on the members tab', function () {
+    [$manager, $household] = householdWithMember('manager');
+
+    $this->withSession(['user_id' => $manager->id])
+        ->get(route('households.members.index', $household->id))
+        ->assertOk()
+        ->assertSee($manager->fullName())
+        ->assertSee($manager->email)
+        ->assertSee('Manager');
+});
