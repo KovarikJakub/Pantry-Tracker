@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Household;
+use App\Services\CategoryTree;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -50,7 +51,8 @@ class HouseholdController extends Controller
     }
 
     /**
-     * Shows the household's appliances and shelves. Members only.
+     * Shows the household's appliances and shelves, plus its product catalogue for the "Add food" modal.
+     * Members only.
      */
     public function show(string $id): View
     {
@@ -63,6 +65,17 @@ class HouseholdController extends Controller
             'appliances.shelves.foodItems.product',
         ]);
 
-        return view('household.show', ['household' => $household]);
+        $categories = $household->catalogueCategories()->orderBy('name')->get();
+        $categoriesById = $categories->keyBy('id');
+        $products = $household->catalogueProducts()->with('category')->orderBy('name')->get();
+
+        return view('household.show', [
+            'household' => $household,
+            'catalogueCategoriesByParent' => $categories->groupBy('parent_id'),
+            'catalogueProducts' => $products,
+            'productCategoryIds' => $products->mapWithKeys(fn ($product) => [
+                $product->id => CategoryTree::ancestorIds($categoriesById, $product->category_id),
+            ]),
+        ]);
     }
 }

@@ -1,4 +1,4 @@
-@props(['household', 'shelfLabels'])
+@props(['household', 'shelfLabels', 'categoriesByParent', 'products', 'productCategoryIds'])
 
 {{--
     One shared modal for putting a catalogue product on a shelf. Each shelf header opens it by dispatching
@@ -27,7 +27,7 @@
     <dialog
         x-ref="dialog"
         aria-labelledby="add-food-title"
-        class="m-auto w-full max-w-3xl border bg-white p-0 text-sm shadow-xl backdrop:bg-black/40"
+        class="m-auto h-[85vh] max-h-none w-[min(64rem,calc(100vw-2rem))] max-w-none border bg-white p-0 text-sm shadow-xl backdrop:bg-black/40"
         @click.self="$refs.dialog.close()"
     >
         <form
@@ -35,7 +35,7 @@
             id="add-food-item"
             method="POST"
             action="{{ route('households.food-items.store', $household->id) }}"
-            class="space-y-4 p-6"
+            class="flex h-full flex-col gap-4 p-6"
         >
             @csrf
             <input type="hidden" name="shelf_id" :value="shelfId">
@@ -63,7 +63,11 @@
                 <p role="alert" class="text-red-700">{{ $message }}</p>
             @endforeach
 
-            <x-product.catalog :products="$household->products" />
+            <x-product.catalog
+                :categories-by-parent="$categoriesByParent"
+                :products="$products"
+                :product-category-ids="$productCategoryIds"
+            />
         </form>
     </dialog>
 </div>

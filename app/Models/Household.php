@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -64,6 +65,26 @@ class Household extends Model
     public function catalogueOwnerId(): ?string
     {
         return $this->has_custom_categories ? $this->id : null;
+    }
+
+    /**
+     * The categories of the catalogue this household currently uses (its own copy or the default tree).
+     *
+     * @return Builder<Category>
+     */
+    public function catalogueCategories(): Builder
+    {
+        return Category::query()->where('household_id', $this->catalogueOwnerId());
+    }
+
+    /**
+     * The products of the catalogue this household currently uses (its own copies or the global products).
+     *
+     * @return Builder<ProductCatalog>
+     */
+    public function catalogueProducts(): Builder
+    {
+        return ProductCatalog::query()->where('household_id', $this->catalogueOwnerId());
     }
 
     public function isManagedBy(string $userId): bool
