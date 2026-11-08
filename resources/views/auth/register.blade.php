@@ -1,4 +1,4 @@
-<x-layouts.app title="Register">
+<x-layouts::app title="Register">
     <form method="POST" action="{{ route('register.store') }}" class="flex max-w-sm flex-col gap-3">
         @csrf
 
@@ -24,4 +24,4 @@
 
         <a href="{{ route('login') }}" class="underline">Already have an account? Log in</a>
     </form>
-</x-layouts.app>
+</x-layouts::app>

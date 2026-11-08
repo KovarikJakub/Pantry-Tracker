@@ -1,20 +1,5 @@
 <?php
 
-use App\Models\Household;
-use App\Models\User;
-
-/**
- * @return array{0: User, 1: Household}
- */
-function householdWithMember(string $role): array
-{
-    $user = User::factory()->create();
-    $household = Household::query()->create(['name' => 'Home']);
-    $household->members()->create(['user_id' => $user->id, 'role' => $role, 'joined_at' => now()]);
-
-    return [$user, $household];
-}
-
 it('lets a manager add an appliance', function () {
     [$manager, $household] = householdWithMember('manager');
 
@@ -28,6 +13,7 @@ it('lets a manager add an appliance', function () {
 
     $this->withSession(['user_id' => $manager->id])
         ->get(route('households.show', $household->id))
+        ->assertOk()
         ->assertSee('Kitchen Fridge');
 });
 

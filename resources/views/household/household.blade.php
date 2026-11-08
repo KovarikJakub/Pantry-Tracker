@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts::app>
     <h1>My households:</h1>
 
     @if ($households->isEmpty())
@@ -23,4 +23,4 @@
 
         <button type="submit" class="bg-stone-800 p-2 text-white">Create household</button>
     </form>
-</x-layouts.app>
+</x-layouts::app>
