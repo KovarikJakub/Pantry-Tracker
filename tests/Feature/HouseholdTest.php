@@ -2,6 +2,7 @@
 
 use App\Models\Category;
 use App\Models\User;
+use Livewire\Livewire;
 
 it('shows the manager tools to a manager', function () {
     [$manager, $household] = householdWithMember('manager');
@@ -69,15 +70,52 @@ it('lets a manager remove a regular member but not a manager', function () {
     $member = User::factory()->create();
     $household->members()->create(['user_id' => $member->id, 'role' => 'member', 'joined_at' => now()]);
 
-    $this->withSession(['user_id' => $manager->id])
-        ->delete(route('households.members.destroy', [$household->id, $member->id]))
-        ->assertRedirect(route('households.members.index', $household->id));
+    $this->withSession(['user_id' => $manager->id]);
 
-    $this->withSession(['user_id' => $manager->id])
-        ->delete(route('households.members.destroy', [$household->id, $manager->id]))
-        ->assertSessionHasErrors('member', null, 'memberRemove');
+    Livewire::test('household.member-list', ['household' => $household])
+        ->assertSee($member->email)
+        ->call('remove', $member->id)
+        ->assertSet('status', 'User was removed.')
+        ->assertDontSee($member->email)
+        ->call('remove', $manager->id)
+        ->assertSet('status', 'A manager cannot be removed from the household.');
 
     expect($household->memberUsers()->pluck('users.id')->all())->toBe([$manager->id]);
+});
+
+it('puts a user added by email on the list right away', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $newcomer = User::factory()->create();
+
+    $this->withSession(['user_id' => $manager->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->assertDontSee($newcomer->email)
+        ->set('email', $newcomer->email)
+        ->call('add')
+        ->assertSet('status', 'User was added.')
+        ->assertSet('email', '')
+        ->assertSee($newcomer->email)
+        ->assertSee('(you)');
+
+    expect($household->memberUsers()->whereKey($newcomer->id)->sole()->pivot->role)->toBe('member');
+});
+
+it('reports an unknown or already added email without changing the members', function () {
+    [$manager, $household] = householdWithMember('manager');
+
+    $this->withSession(['user_id' => $manager->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->set('email', 'nobody@example.com')
+        ->call('add')
+        ->assertSet('status', 'User does not exist.')
+        ->assertSet('email', 'nobody@example.com')
+        ->set('email', $manager->email)
+        ->call('add')
+        ->assertSet('status', 'User is already in the household.');
+
+    expect($household->members()->count())->toBe(1);
 });
 
 it('forbids a regular member from removing members', function () {
@@ -85,7 +123,11 @@ it('forbids a regular member from removing members', function () {
     $member = User::factory()->create();
     $household->members()->create(['user_id' => $member->id, 'role' => 'member', 'joined_at' => now()]);
 
-    $this->withSession(['user_id' => $member->id])
-        ->delete(route('households.members.destroy', [$household->id, $member->id]))
+    $this->withSession(['user_id' => $member->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->call('remove', $manager->id)
         ->assertForbidden();
+
+    expect($household->members()->count())->toBe(2);
 });
