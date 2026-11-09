@@ -1,10 +1,68 @@
-@props(['household', 'shelf'])
+<?php
 
-@php($items = $shelf->foodItems->where('status', 'stored')->sortBy('expiration_date'))
+use App\Models\FoodItem;
+use App\Models\Household;
+use App\Models\Shelf;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
-<section class="border border-stone-200 bg-white">
+new class extends Component {
+    public Household $household;
+
+    public Shelf $shelf;
+
+    /**
+     * Runs before every update. Route middleware does not protect Livewire's update requests.
+     */
+    public function hydrate(): void
+    {
+        $this->authorize('view', $this->household);
+    }
+
+    /**
+     * The food stored on this shelf, soonest expiry first.
+     *
+     * @return Collection<int, FoodItem>
+     */
+    #[Computed]
+    public function items(): Collection
+    {
+        return $this->shelf->foodItems()->with('product')->where('status', 'stored')->orderBy('expiration_date')->get();
+    }
+
+    /**
+     * Every shelf hears the event; only the shelf that got the food re-renders.
+     */
+    #[On('food-added')]
+    public function refreshIfThisShelf(string $shelfId): void
+    {
+        if ($shelfId !== $this->shelf->id) {
+            $this->skipRender();
+        }
+    }
+};
+?>
+
+<section
+    data-shelf-card
+    class="cursor-pointer border border-stone-200 bg-white"
+    :class="{
+        'ring-2 ring-stone-800': activeShelfId === @js($shelf->id),
+        'ring-2 ring-amber-400': needsShelfPrompt,
+    }"
+    @click="if (! $event.target.closest('button, a, input, select, form')) selectShelf(@js($shelf->id))"
+>
     <header class="flex flex-wrap items-center gap-x-3 gap-y-1 bg-stone-100 px-3 py-2">
         <h3 class="font-semibold">{{ $shelf->label }}</h3>
+        <button
+            type="button"
+            class="text-xs underline"
+            :aria-pressed="activeShelfId === @js($shelf->id)"
+            @click="toggleShelf(@js($shelf->id))"
+            x-text="activeShelfId === @js($shelf->id) ? 'Selected' : 'Select'"
+        >Select</button>
         <button
             type="button"
             x-data
@@ -13,7 +71,7 @@
         >+ Add food</button>
         <x-shelf.capacity-bar
             class="ml-auto"
-            :current-weight="$items->sum('weight_volume')"
+            :current-weight="$this->items->sum('weight_volume')"
             :max-weight="$shelf->max_load_capacity_g"
         />
     </header>
@@ -27,7 +85,7 @@
             <col class="w-52">
         </colgroup>
         <tbody>
-            @forelse ($items as $item)
+            @forelse ($this->items as $item)
                 <x-food-item.row :household="$household" :food-item="$item" />
             @empty
                 <tr class="border-t border-stone-200">

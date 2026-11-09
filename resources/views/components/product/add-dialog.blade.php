@@ -81,10 +81,16 @@
                     @error('measurement_unit', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
                 </label>
 
-                <label class="col-span-2 flex flex-col gap-1">
+                <label class="flex flex-col gap-1">
                     Default price
                     <input name="default_price" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_price') }}" required class="border px-2 py-1">
                     @error('default_price', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                </label>
+
+                <label class="flex flex-col gap-1">
+                    Default expiry (days)
+                    <input name="default_expiry_days" type="number" min="1" max="65535" step="1" inputmode="numeric" value="{{ old('default_expiry_days') }}" required class="border px-2 py-1">
+                    @error('default_expiry_days', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
                 </label>
             </fieldset>
 

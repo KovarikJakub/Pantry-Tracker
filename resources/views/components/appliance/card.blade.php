@@ -5,7 +5,7 @@
 @else
     <div class="mt-3 space-y-3">
         @foreach ($appliance->shelves as $shelf)
-            <x-shelf.card :household="$household" :shelf="$shelf" />
+            <livewire:shelf.card :household="$household->withoutRelations()" :shelf="$shelf->withoutRelations()" :key="$shelf->id" />
         @endforeach
     </div>
 @endif

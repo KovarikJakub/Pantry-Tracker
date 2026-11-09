@@ -3,7 +3,7 @@
         <p class="mt-4">{{ session('food_item_status') }}</p>
     @endif
 
-    <x-household.expiring-soon :household="$household" />
+    <livewire:household.expiring-soon :household="$household->withoutRelations()" />
 
     <x-food-item.add-dialog
         :household="$household"
@@ -13,5 +13,12 @@
         :product-category-ids="$productCategoryIds"
     />
 
-    <x-appliance.list :household="$household" />
+    <x-shelf.selection :household="$household">
+        {{-- Sticky, so the bar stays reachable while picking a shelf further down the page. --}}
+        <div class="sticky top-0 z-30 mt-6 bg-stone-50 py-2">
+            <livewire:product.searchbar :household="$household->withoutRelations()" />
+        </div>
+
+        <x-appliance.list :household="$household" />
+    </x-shelf.selection>
 </x-household.layout>

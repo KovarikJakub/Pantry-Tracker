@@ -1,6 +1,6 @@
 @props(['household','foodItem'])
 
-<tr class="border-t border-stone-200">
+<tr wire:key="{{ $foodItem->id }}" class="border-t border-stone-200">
     <td class="px-3 py-2">{{ $foodItem->product->name }}</td>
     <td class="px-3 py-2">{{ (float) $foodItem->weight_volume }} {{ $foodItem->product->measurement_unit }}</td>
     <td class="px-3 py-2"><x-food-item.expiry-tag :expiry-date="$foodItem->expiration_date" /></td>

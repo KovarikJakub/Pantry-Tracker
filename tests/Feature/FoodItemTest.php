@@ -5,6 +5,7 @@ use App\Models\FoodItem;
 use App\Models\Household;
 use App\Models\Shelf;
 use App\Models\User;
+use Livewire\Livewire;
 
 /**
  * Puts one stored food item on a new shelf of the household.
@@ -103,14 +104,14 @@ function shelfWithSoonAndLaterFood(): array
 it('lists the food on a shelf by soonest expiry', function () {
     [$household, $shelf] = shelfWithSoonAndLaterFood();
 
-    $this->blade('<x-shelf.card :household="$household" :shelf="$shelf" />', ['household' => $household, 'shelf' => $shelf])
+    Livewire::test('shelf.card', ['household' => $household, 'shelf' => $shelf])
         ->assertSeeInOrder(['Soon milk', 'Later milk']);
 });
 
 it('summarises only the food expiring within a week', function () {
     [$household] = shelfWithSoonAndLaterFood();
 
-    $this->blade('<x-household.expiring-soon :household="$household" />', ['household' => $household])
+    Livewire::test('household.expiring-soon', ['household' => $household])
         ->assertSee('Expiring soon')
         ->assertSee('Soon milk')
         ->assertDontSee('Later milk');
