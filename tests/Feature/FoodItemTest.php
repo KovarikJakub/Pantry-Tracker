@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\FoodItem;
 use App\Models\Household;
+use App\Models\Shelf;
 use App\Models\User;
 
 /**
@@ -70,4 +71,47 @@ it('forbids a non-member from changing a food item', function () {
         ->assertForbidden();
 
     expect($foodItem->fresh())->not->toBeNull();
+});
+
+/**
+ * Puts food expiring soon and food expiring later on one shelf, the later one first.
+ *
+ * @return array{0: Household, 1: Shelf}
+ */
+function shelfWithSoonAndLaterFood(): array
+{
+    [$member, $household] = householdWithMember('member');
+    $shelf = $household->appliances()->create(['name' => 'Fridge', 'appliance_type' => 'fridge'])
+        ->shelves()->create(['label' => 'Top', 'shelf_order' => 1, 'max_load_capacity_g' => 5000]);
+    $dairy = Category::query()->create(['name' => 'Dairy']);
+
+    foreach (['Later milk' => 30, 'Soon milk' => 3] as $name => $daysLeft) {
+        $shelf->foodItems()->create([
+            'product_id' => catalogueProduct($dairy, $name)->id,
+            'registered_by_user_id' => $member->id,
+            'weight_volume' => 500,
+            'purchase_price' => 50,
+            'expiration_date' => today()->addDays($daysLeft),
+            'status' => 'stored',
+            'added_at' => now(),
+        ]);
+    }
+
+    return [$household, $shelf];
+}
+
+it('lists the food on a shelf by soonest expiry', function () {
+    [$household, $shelf] = shelfWithSoonAndLaterFood();
+
+    $this->blade('<x-shelf.card :household="$household" :shelf="$shelf" />', ['household' => $household, 'shelf' => $shelf])
+        ->assertSeeInOrder(['Soon milk', 'Later milk']);
+});
+
+it('summarises only the food expiring within a week', function () {
+    [$household] = shelfWithSoonAndLaterFood();
+
+    $this->blade('<x-household.expiring-soon :household="$household" />', ['household' => $household])
+        ->assertSee('Expiring soon')
+        ->assertSee('Soon milk')
+        ->assertDontSee('Later milk');
 });

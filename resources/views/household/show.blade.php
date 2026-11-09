@@ -3,6 +3,8 @@
         <p class="mt-4">{{ session('food_item_status') }}</p>
     @endif
 
+    <x-household.expiring-soon :household="$household" />
+
     <x-food-item.add-dialog
         :household="$household"
         :shelf-labels="$household->appliances->flatMap->shelves->pluck('label', 'id')"

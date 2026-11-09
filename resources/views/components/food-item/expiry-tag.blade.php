@@ -26,6 +26,8 @@
 
 <time
     datetime="{{ $expiry->toDateString() }}"
-    title="{{ $expiry->toDateString() }}"
-    {{ $attributes->merge(['class' => "inline-block rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap {$colors}"]) }}
->{{ $text }}</time>
+    {{ $attributes->merge(['class' => "group/expiry inline-flex w-24 justify-center rounded-full py-0.5 text-xs font-medium whitespace-nowrap tabular-nums {$colors}"]) }}
+>
+    <span class="group-hover/expiry:hidden">{{ $text }}</span>
+    <span class="hidden group-hover/expiry:inline">{{ $expiry->toDateString() }}</span>
+</time>

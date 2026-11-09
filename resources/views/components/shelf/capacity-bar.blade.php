@@ -22,5 +22,5 @@
     >
         <div class="h-full {{ $fillColor }}" style="width: {{ $percent }}%"></div>
     </div>
-    <span class="tabular-nums"><b>{{ $current }} g</b> / {{ $max }} g</span>
+    <span class="w-32 whitespace-nowrap tabular-nums"><b>{{ $current }} g</b> / {{ $max }} g</span>
 </div>

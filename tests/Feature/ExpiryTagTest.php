@@ -22,3 +22,11 @@ it('describes how far away the expiry date is', function (int $daysFromNow, stri
     'two months' => [59, '> 2 months', 'bg-stone-100'],
     'two years' => [731, '> 2 years', 'bg-stone-100'],
 ]);
+
+it('holds the exact date for hover instead of a tooltip', function () {
+    $this->travelTo(Carbon::parse('2026-01-15 10:00'));
+
+    $this->blade('<x-food-item.expiry-tag :expiry-date="$date" />', ['date' => today()->addDays(3)])
+        ->assertSee('2026-01-18')
+        ->assertDontSee('title=', false);
+});
