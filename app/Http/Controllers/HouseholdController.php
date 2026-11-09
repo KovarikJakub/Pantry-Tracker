@@ -18,36 +18,7 @@ class HouseholdController extends Controller
      */
     public function index(Request $request): View
     {
-        $userId = $request->user()->id;
-
-        $households = Household::query()
-            ->whereHas('members', fn (Builder $members) => $members->where('user_id', $userId))
-            ->orderBy('name')
-            ->get();
-
-        return view('household.household', ['households' => $households]);
-    }
-
-    /**
-     * Creates a household and makes the current user its manager.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
-
-        DB::transaction(function () use ($validated, $request): void {
-            $household = Household::query()->create(['name' => $validated['name']]);
-
-            $household->members()->create([
-                'user_id' => $request->user()->id,
-                'role' => 'manager',
-                'joined_at' => now(),
-            ]);
-        });
-
-        return redirect()->route('households.index');
+        return view('household.household');
     }
 
     /**
