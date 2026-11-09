@@ -63,6 +63,7 @@ class ProductController extends Controller
                 'barcode',
                 'default_size_g_ml',
                 'measurement_unit',
+                'default_price',
                 'calories_per_100g',
                 'protein_per_100g',
                 'fat_per_100g',

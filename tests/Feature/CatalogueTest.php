@@ -186,3 +186,27 @@ it('forbids a regular member from deleting a product', function () {
 
     expect($product->fresh()->trashed())->toBeFalse();
 });
+
+it('stores the default price of a new product and keeps it when the default catalogue is copied', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $dairy = Category::query()->create(['name' => 'Dairy']);
+    catalogueProduct($dairy, 'Cheddar')->update(['default_price' => 65]);
+
+    $this->withSession(['user_id' => $manager->id])
+        ->post(route('households.products.store', $household->id), [
+            'category_id' => $dairy->id,
+            'name' => 'Gouda',
+            'default_size_g_ml' => 200,
+            'measurement_unit' => 'g',
+            'default_price' => 49.5,
+            'calories_per_100g' => 350,
+            'protein_per_100g' => 25,
+            'fat_per_100g' => 27,
+            'carbs_per_100g' => 2,
+            'fiber_per_100g' => 0,
+        ])
+        ->assertRedirect(route('households.catalogue', $household->id));
+
+    expect($household->products()->orderBy('name')->pluck('default_price', 'name')->all())
+        ->toBe(['Cheddar' => '65.00', 'Gouda' => '49.50']);
+});

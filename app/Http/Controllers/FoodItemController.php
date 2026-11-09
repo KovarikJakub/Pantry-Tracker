@@ -18,7 +18,7 @@ class FoodItemController extends Controller
 {
     /**
      * Puts one item of a catalogue product on one of the household's shelves,
-     * unless it would exceed the shelf's capacity. Members only.
+     * unless it would exceed the shelf's capacity. Without a price, the product's default price is used. Members only.
      */
     public function store(Request $request, string $id): RedirectResponse
     {
@@ -30,7 +30,7 @@ class FoodItemController extends Controller
         $validated = $request->validateWithBag('foodItem', [
             'shelf_id' => ['required', 'uuid'],
             'product_id' => ['required', 'uuid'],
-            'purchase_price' => ['required', 'numeric', 'min:0', 'max:99999999'],
+            'purchase_price' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'expiration_date' => ['required', 'date'],
         ], [
             'shelf_id.required' => 'Select a shelf first.',
@@ -59,7 +59,7 @@ class FoodItemController extends Controller
                 'product_id' => $product->id,
                 'registered_by_user_id' => $userId,
                 'weight_volume' => $product->default_size_g_ml,
-                'purchase_price' => $validated['purchase_price'],
+                'purchase_price' => $validated['purchase_price'] ?? $product->default_price,
                 'expiration_date' => $validated['expiration_date'],
                 'status' => 'stored',
                 'added_at' => now(),

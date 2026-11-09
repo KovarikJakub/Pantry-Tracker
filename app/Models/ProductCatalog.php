@@ -27,6 +27,7 @@ class ProductCatalog extends Model
         'name',
         'default_size_g_ml',
         'measurement_unit',
+        'default_price',
         'calories_per_100g',
         'protein_per_100g',
         'fat_per_100g',
@@ -38,6 +39,7 @@ class ProductCatalog extends Model
     {
         return [
             'default_size_g_ml' => 'decimal:2',
+            'default_price' => 'decimal:2',
             'calories_per_100g' => 'decimal:2',
             'protein_per_100g' => 'decimal:2',
             'fat_per_100g' => 'decimal:2',

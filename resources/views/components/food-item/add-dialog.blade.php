@@ -49,8 +49,8 @@
 
             <div class="flex flex-wrap items-end gap-3">
                 <label class="flex flex-col gap-1">
-                    Price
-                    <input name="purchase_price" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('purchase_price') }}" required autofocus class="border px-2 py-1">
+                    <span>Price <span class="text-stone-500">(empty = product's default)</span></span>
+                    <input name="purchase_price" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('purchase_price') }}" autofocus class="border px-2 py-1">
                 </label>
                 <label class="flex flex-col gap-1">
                     Use by

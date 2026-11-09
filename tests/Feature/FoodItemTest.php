@@ -115,3 +115,26 @@ it('summarises only the food expiring within a week', function () {
         ->assertSee('Soon milk')
         ->assertDontSee('Later milk');
 });
+
+it('copies the default price of the product unless a price is given', function (?string $enteredPrice, string $expectedPrice) {
+    [$member, $household] = householdWithMember('member');
+    $shelf = $household->appliances()->create(['name' => 'Fridge', 'appliance_type' => 'fridge'])
+        ->shelves()->create(['label' => 'Top', 'shelf_order' => 1, 'max_load_capacity_g' => 5000]);
+    $product = catalogueProduct(Category::query()->create(['name' => 'Dairy']), 'Cheddar');
+    $product->update(['default_price' => 39.9]);
+
+    $this->withSession(['user_id' => $member->id])
+        ->post(route('households.food-items.store', $household->id), [
+            'shelf_id' => $shelf->id,
+            'product_id' => $product->id,
+            'purchase_price' => $enteredPrice,
+            'expiration_date' => today()->addWeek()->toDateString(),
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($shelf->foodItems()->sole()->purchase_price)->toBe($expectedPrice);
+})->with([
+    'left empty' => [null, '39.90'],
+    'entered' => ['12.50', '12.50'],
+    'entered as zero' => ['0', '0.00'],
+]);
