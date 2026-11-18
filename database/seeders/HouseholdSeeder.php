@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Household;
+use App\Models\HouseholdMember;
 use App\Models\Shelf;
 use App\Models\User;
 use App\Services\CatalogCopier;
@@ -65,8 +66,8 @@ class HouseholdSeeder extends Seeder
 
         $catalogCopier->copyDefaultTo($household);
 
-        $this->addMember($household, 'admin@example.com', 'manager');
-        $member = $this->addMember($household, 'user@example.com', 'member');
+        $this->addMember($household, 'admin@example.com', HouseholdMember::ROLE_OWNER);
+        $member = $this->addMember($household, 'user@example.com', HouseholdMember::ROLE_MEMBER);
 
         foreach (self::APPLIANCES as $applianceData) {
             $appliance = $household->appliances()->firstOrCreate(

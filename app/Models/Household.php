@@ -101,8 +101,11 @@ class Household extends Model
         return ProductCatalog::query()->where('household_id', $this->catalogueOwnerId());
     }
 
+    /**
+     * True for the owner and managers.
+     */
     public function isManagedBy(string $userId): bool
     {
-        return $this->members()->where('user_id', $userId)->where('role', 'manager')->exists();
+        return $this->members()->where('user_id', $userId)->whereIn('role', HouseholdMember::MANAGING_ROLES)->exists();
     }
 }

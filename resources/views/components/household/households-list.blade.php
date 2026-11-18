@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Household;
+use App\Models\HouseholdMember;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -47,13 +48,13 @@ new class extends Component {
 
             $household->members()->create([
                 'user_id' => $userId,
-                'role' => 'manager',
+                'role' => HouseholdMember::ROLE_OWNER,
                 'joined_at' => now(),
             ]);
         });
 
         unset($this->households);
-        reset($this->name);
+        $this->reset('name');
     }
 };
 ?>

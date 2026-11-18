@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\Household;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -65,22 +66,118 @@ it('lists the household members with their roles on the members tab', function (
         ->assertSee('Manager');
 });
 
-it('lets a manager remove a regular member but not a manager', function () {
+/**
+ * Adds a user with the given role to the household.
+ */
+function addHouseholdMember(Household $household, string $role): User
+{
+    $user = User::factory()->create();
+    $household->members()->create(['user_id' => $user->id, 'role' => $role, 'joined_at' => now()]);
+
+    return $user;
+}
+
+function roleOf(Household $household, User $user): ?string
+{
+    return $household->members()->where('user_id', $user->id)->value('role');
+}
+
+it('lets a manager remove and promote a regular member', function () {
     [$manager, $household] = householdWithMember('manager');
-    $member = User::factory()->create();
-    $household->members()->create(['user_id' => $member->id, 'role' => 'member', 'joined_at' => now()]);
+    $member = addHouseholdMember($household, 'member');
+    $other = addHouseholdMember($household, 'member');
 
     $this->withSession(['user_id' => $manager->id]);
 
     Livewire::test('household.member-list', ['household' => $household])
-        ->assertSee($member->email)
-        ->call('remove', $member->id)
+        ->call('promote', $member->id)
+        ->assertSet('status', 'User is now a manager.')
+        ->call('remove', $other->id)
         ->assertSet('status', 'User was removed.')
-        ->assertDontSee($member->email)
-        ->call('remove', $manager->id)
-        ->assertSet('status', 'A manager cannot be removed from the household.');
+        ->assertDontSee($other->email);
 
-    expect($household->memberUsers()->pluck('users.id')->all())->toBe([$manager->id]);
+    expect(roleOf($household, $member))->toBe('manager')
+        ->and(roleOf($household, $other))->toBeNull();
+});
+
+it('stops a manager from demoting or removing another manager or the owner', function () {
+    [$manager, $household] = householdWithMember('manager');
+    $otherManager = addHouseholdMember($household, 'manager');
+    $owner = addHouseholdMember($household, 'owner');
+
+    $this->withSession(['user_id' => $manager->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->call('demote', $otherManager->id)
+        ->assertSet('status', 'You cannot demote this user.')
+        ->call('remove', $otherManager->id)
+        ->assertSet('status', 'You cannot remove this user.')
+        ->call('demote', $owner->id)
+        ->assertSet('status', 'You cannot demote this user.')
+        ->call('remove', $owner->id)
+        ->assertSet('status', 'You cannot remove this user.');
+
+    expect(roleOf($household, $otherManager))->toBe('manager')
+        ->and(roleOf($household, $owner))->toBe('owner');
+});
+
+it('lets the owner demote and remove managers', function () {
+    [$owner, $household] = householdWithMember('owner');
+    $demoted = addHouseholdMember($household, 'manager');
+    $removed = addHouseholdMember($household, 'manager');
+
+    $this->withSession(['user_id' => $owner->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->call('demote', $demoted->id)
+        ->assertSet('status', 'User is now a member.')
+        ->call('remove', $removed->id)
+        ->assertSet('status', 'User was removed.');
+
+    expect(roleOf($household, $demoted))->toBe('member')
+        ->and(roleOf($household, $removed))->toBeNull();
+});
+
+it('stops anyone from removing or demoting themselves', function (string $role) {
+    [$user, $household] = householdWithMember($role);
+
+    $this->withSession(['user_id' => $user->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->call('remove', $user->id)
+        ->assertSet('status', 'You cannot remove this user.')
+        ->call('demote', $user->id)
+        ->assertSet('status', 'You cannot demote this user.');
+
+    expect(roleOf($household, $user))->toBe($role);
+})->with(['owner', 'manager']);
+
+it('shows only the actions the current user may take', function () {
+    [$manager, $household] = householdWithMember('manager');
+    addHouseholdMember($household, 'owner');
+    addHouseholdMember($household, 'member');
+
+    $this->withSession(['user_id' => $manager->id]);
+
+    Livewire::test('household.member-list', ['household' => $household])
+        ->assertSeeHtml('wire:click="promote(')
+        ->assertDontSeeHtml('wire:click="demote(')
+        ->assertSeeHtmlInOrder(['Owner', 'Manager', 'Member']);
+});
+
+it('makes the creator the owner of a new household', function () {
+    $user = User::factory()->create();
+
+    $this->withSession(['user_id' => $user->id]);
+
+    Livewire::test('household.households-list')
+        ->set('name', 'New home')
+        ->call('add');
+
+    $household = Household::query()->where('name', 'New home')->sole();
+
+    expect(roleOf($household, $user))->toBe('owner')
+        ->and($household->isManagedBy($user->id))->toBeTrue();
 });
 
 it('puts a user added by email on the list right away', function () {
