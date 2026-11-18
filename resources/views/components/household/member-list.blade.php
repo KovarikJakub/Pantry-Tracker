@@ -170,6 +170,7 @@ new class extends Component {
         <p role="status" class="mb-2">{{ $status }}</p>
     @endif
 
+    {{-- Columns: avatar (size-10), name (flex-1), role (w-32), actions (w-48); the add-member row uses the same widths. --}}
     <ul class="divide-y divide-stone-200 border border-stone-200 bg-white">
         @foreach ($this->members as $member)
             @php
@@ -191,7 +192,7 @@ new class extends Component {
                     <p class="truncate text-sm text-stone-500">{{ $member->email }}</p>
                 </div>
 
-                <div class="shrink-0 text-right">
+                <div class="w-32 shrink-0 text-right">
                     <span @class([
                         'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
                         'bg-emerald-100 text-emerald-800' => $role === HouseholdMember::ROLE_OWNER,
@@ -246,7 +247,7 @@ new class extends Component {
                 </div>
             </li>
         @endforeach
-    </ul>
 
-    <x-household.add-member-form />
+        <x-household.add-member-form />
+    </ul>
 </section>
