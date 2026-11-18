@@ -40,7 +40,7 @@
     <dialog
         x-ref="dialog"
         aria-labelledby="add-product-title"
-        class="m-auto w-full max-w-lg border bg-white p-0 text-sm shadow-xl backdrop:bg-black/40"
+        class="m-auto w-full max-w-lg border bg-white p-0 text-sm text-stone-800 shadow-xl backdrop:bg-black/40"
         @click.self="$refs.dialog.close()"
     >
         <form x-ref="form" method="POST" action="{{ route('households.products.store', $household->id) }}" class="space-y-4 p-6">

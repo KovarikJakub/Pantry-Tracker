@@ -27,7 +27,7 @@
     <dialog
         x-ref="dialog"
         aria-labelledby="add-food-title"
-        class="m-auto h-[85vh] max-h-none w-[min(64rem,calc(100vw-2rem))] max-w-none border bg-white p-0 text-sm shadow-xl backdrop:bg-black/40"
+        class="m-auto h-[85vh] max-h-none w-[min(64rem,calc(100vw-2rem))] max-w-none border bg-white p-0 text-sm text-stone-800 shadow-xl backdrop:bg-black/40"
         @click.self="$refs.dialog.close()"
     >
         <form
