@@ -14,10 +14,12 @@
     />
 
     <x-shelf.selection :household="$household">
-        {{-- Sticky, so the bar stays reachable while picking a shelf further down the page. --}}
-        <div class="sticky top-0 z-30 mt-6 bg-stone-50 py-2">
-            <livewire:product.searchbar :household="$household->withoutRelations()" />
-        </div>
+        {{-- Hidden without shelves, as there is nowhere to add food. Sticky, so the bar stays reachable while picking a shelf further down the page. --}}
+        @if ($household->appliances->contains(fn ($appliance) => $appliance->shelves->isNotEmpty()))
+            <div class="sticky top-0 z-30 mt-6 bg-stone-50 py-2">
+                <livewire:product.searchbar :household="$household->withoutRelations()" />
+            </div>
+        @endif
 
         <x-appliance.list :household="$household" />
     </x-shelf.selection>

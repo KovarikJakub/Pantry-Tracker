@@ -166,3 +166,19 @@ it('renders one search bar for the whole shelves tab', function () {
 
     expect(substr_count($content, 'role="combobox"'))->toBe(1);
 });
+
+it('shows the search bar only when the household has a shelf', function () {
+    [$member, $household] = householdWithMember('member');
+    $appliance = $household->appliances()->create(['name' => 'Fridge', 'appliance_type' => 'fridge']);
+
+    $this->withSession(['user_id' => $member->id])
+        ->get(route('households.show', $household->id))
+        ->assertOk()
+        ->assertDontSee('Search products to add...');
+
+    $appliance->shelves()->create(['label' => 'Top', 'shelf_order' => 1, 'max_load_capacity_g' => 5000]);
+
+    $this->withSession(['user_id' => $member->id])
+        ->get(route('households.show', $household->id))
+        ->assertSee('Search products to add...');
+});
