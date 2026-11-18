@@ -50,7 +50,7 @@ it('lets a manager remove an empty appliance with its shelves', function () {
     $this->withSession(['user_id' => $manager->id]);
 
     Livewire::test('appliance.manage-list', ['household' => $household])
-        ->call('remove', $appliance->id)
+        ->call('removeAppliance', $appliance->id)
         ->assertSet('status', 'Old Fridge was removed.')
         ->assertSee('There are no appliances in this household.');
 
@@ -74,7 +74,7 @@ it('keeps an appliance that still stores food', function () {
     $this->withSession(['user_id' => $manager->id]);
 
     Livewire::test('appliance.manage-list', ['household' => $household])
-        ->call('remove', $appliance->id)
+        ->call('removeAppliance', $appliance->id)
         ->assertSet('status', 'Fridge still contains food. Remove the food first.');
 
     expect($foodItem->fresh())->not->toBeNull();
@@ -87,7 +87,7 @@ it('forbids a regular member from removing an appliance', function () {
     $this->withSession(['user_id' => $member->id]);
 
     Livewire::test('appliance.manage-list', ['household' => $household])
-        ->call('remove', $appliance->id)
+        ->call('removeAppliance', $appliance->id)
         ->assertForbidden();
 
     expect($appliance->fresh())->not->toBeNull();
