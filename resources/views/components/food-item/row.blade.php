@@ -8,13 +8,13 @@
         <form method="POST" action="{{ route('households.food-items.update', [$household->id, $foodItem->id]) }}" class="inline">
             @csrf
             @method('PATCH')
-            <button type="submit" name="status" value="consumed">Eat</button>
-            <button type="submit" name="status" value="thrown_out">Throw out</button>
+            <x-food-item.action-button label="Eat" icon="eat" name="status" value="consumed" />
+            <x-food-item.action-button label="Throw out" icon="trash" name="status" value="thrown_out" />
         </form>
         <form method="POST" action="{{ route('households.food-items.destroy', [$household->id, $foodItem->id]) }}" class="inline">
             @csrf
             @method('DELETE')
-            <button type="submit">Remove</button>
+            <x-food-item.action-button label="Remove" icon="remove" />
         </form>
     </td>
 </tr>
