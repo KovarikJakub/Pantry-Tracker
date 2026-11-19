@@ -10,6 +10,7 @@ use App\Http\Controllers\FoodItemController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\HouseholdMemberController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShelfController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateAdmin;
@@ -47,4 +48,11 @@ Route::middleware(Authenticate::class)->group(function () {
 
     Route::delete('/households/{id}/products/{productId}', [ProductController::class, 'destroy'])->whereUuid(['id', 'productId'])->name('households.products.destroy');
     Route::post('/households/{id}/products', [ProductController::class, 'store'])->whereUuid('id')->name('households.products.store');
+
+    // --- Profile Routes ---
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'show')->name('profile.show');
+        Route::get('/profile/edit', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+    });
 });

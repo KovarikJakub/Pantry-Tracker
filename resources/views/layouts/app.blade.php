@@ -17,7 +17,9 @@
             @isset($currentUser)
                 <form method="POST" action="{{ route('logout') }}" class="flex items-center gap-4 text-sm">
                     @csrf
-                    <span>{{ $currentUser->fullName() }}</span>
+                    <a href="{{ route('profile.show') }}" class="hover:underline">
+                        {{ $currentUser->fullName() }}
+                    </a>
                     <button type="submit" class="underline">Log out</button>
                 </form>
             @endisset
