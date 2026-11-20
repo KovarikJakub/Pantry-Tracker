@@ -12,6 +12,7 @@ use App\Http\Controllers\HouseholdMemberController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShelfController;
+use App\Http\Controllers\ConsumptionController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -49,10 +50,11 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::delete('/households/{id}/products/{productId}', [ProductController::class, 'destroy'])->whereUuid(['id', 'productId'])->name('households.products.destroy');
     Route::post('/households/{id}/products', [ProductController::class, 'store'])->whereUuid('id')->name('households.products.store');
 
-    // --- Profile Routes ---
-    Route::controller(ProfileController::class)->group(function () {
-        Route::get('/profile', 'show')->name('profile.show');
-        Route::get('/profile/edit', 'edit')->name('profile.edit');
-        Route::patch('/profile', 'update')->name('profile.update');
-    });
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/consumption', [ConsumptionController::class, 'index'])->name('consumption.index');
+
+
 });
