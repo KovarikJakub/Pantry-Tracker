@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0064)https://www.fit.vut.cz/study/course/IIS/private/projekt/doc.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-2">
+    
+    <title>Projekt IIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+<script src="chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/js/recordConsoleEvents.js"></script></head>
+<body>
+
+<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
+     podle použitého editoru -->
+
+<h1>FIT Lednice</h1> <!-- Nahradte názvem svého zadání -->
+
+<dl>
+	<dt>Autoři</dt>
+	<dd>Jakub Kovařík
+	    <a href="mailto:xkovarj00@stud.fit.vutbr.cz">xkovarj00@stud.fit.vutbr.cz</a> -
+		Návrh datového modelu, Návrh případů užití, Implementace (BE+FE) stránky domácností, produktového katalogu, přihlašování/registrace.
+	</dd>
+	<dd>Aneta Warzelová
+	    <a href="mailto:xwarzea00@stud.fit.vutbr.cz">xwarzea00@stud.fit.vutbr.cz</a> - 
+		Návrh datového modelu, Návrh případů užití, Implementace Admin sekce, Uživatelského profilu, Profil konzumace, UI/UX stránek.
+	</dd>
+	<dt>URL aplikace</dt>
+	<dd><a href="http://www.stud.fit.vutbr.cz/~xwarzea00/IIS">http://www.stud.fit.vutbr.cz/~xwarzea00/IIS</a></dd>
+</dl>
+
+<h2>Uživatelé systému pro testování</h2>
+
+<table>
+<tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>admin@example.com</td><td>password</td><td>Administrátor (není členem žádné domácnosti)</td></tr>
+<tr><td>owner@example.com</td><td>password</td><td>Vlastník domácnosti Novák family</td></tr>
+<tr><td>manager@example.com</td><td>password</td><td>Správce domácnosti Novák family, člen domácnosti Shared flat</td></tr>
+<tr><td>user@example.com</td><td>password</td><td>Člen domácnosti Novák family, vlastník domácnosti Shared flat</td></tr>
+<tr><td>free@example.com</td><td>password</td><td>Registrovaný uživatel bez domácnosti (pro přidání člena e-mailem)</td></tr>
+<tr><td>blocked@example.com</td><td>password</td><td>Zablokovaný účet (přihlášení je odmítnuto)</td></tr>
+</tbody></table>
+
+<h3>Video</h3>
+
+<p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
+
+<h2>Implementace</h2>
+<p>Aplikace je postavena na frameworku <b>Laravel 13 (PHP 8.5)</b> s databází <b>MySQL 8</b>. Uživatelské rozhraní tvoří <b>Blade</b> a <b>Livewire 4</b> komponenty stylované pomocí <b>Tailwind CSS.</b></p>
+
+<h3>Architektura</h3>
+<ul>
+<li><code>routes/web.php</code> - všechny routy, zanořené pod <code>/households/{id}/...</code></li>
+<li><code>app/Http/Controllers</code> - jeden controller pro každý zdroj</li>
+<li><code>app/Services</code> - aplikační logika (<code>Authenticator</code>, <code>UserRegistrar</code>, <code>CatalogCopier</code>, <code>CategoryTree</code>, <code>FoodItemPlacer</code>)</li>
+<li><code>app/Policies/HouseholdPolicy</code> - oprávnění <code>view</code> (člen) a <code>manage</code> (vlastník/správce); middleware <code>Authenticate</code> a <code>AuthenticateAdmin</code></li>
+<li><code>resources/views/components</code> - komponenty UI rozdělené podle oblastí; interaktivní části jsou Livewire komponenty</li>
+<li><code>tests/Feature</code> - testy v Pest</li>
+</ul>
+<p> Pro ponaučení a vyzkoušení nové technologie jsme některé části (vytvoření domácnosti, správa členů, správa spotřebičů a polic, vyhledávání produktů) implementovali jako <b>Livewire</b> komponenty místo klasických controllerů.</p>
+
+<h3>Případy užití</h3>
+
+<h4>Host</h4>
+<ul>
+<li><b>Registrace</b>
+	<ul>
+		<li>Implementace: <code>Auth/RegisterController</code>, <code>Services/UserRegistrar</code>, <code>views/auth/register</code></li>
+	</ul>
+</li>
+<li><b>Náhled domácnosti přes sdílený odkaz</b>
+	<ul>
+		<li>Implementace: doplnit</li>
+	</ul>
+</li>
+</ul>
+
+<h4>Registrovaný uživatel</h4>
+<ul>
+<li><b>Přihlášení / odhlášení</b>
+	<ul>
+		<li>Implementace: <code>Auth/LoginController</code>, <code>Auth/LogoutController</code>, <code>Services/Authenticator</code></li>
+		<li>Vlastní přihlašování přes session (klíč <code>user_id</code>), napojené na Laravel <code>Auth</code>, takže fungují <code>Gate</code> a <code>@can</code>.</li>
+		<li>Lze zablkovoat uživatelský účet (může udělat Admin). Tento uživatelský účet zůstane v databázi ale nemůže se přihlásit. Admin může odblokovat.</li>
+	</ul>
+</li>
+<li><b>Úprava profilu</b>
+	<ul>
+		<li>Implementace: doplnit</li>
+	</ul>
+</li>
+<li><b>Vytvoření domácnosti</b>
+	<ul>
+		<li>Implementace: Livewire <code>household/households-list</code></li>
+		<li>Tvůrce automatický dostává roli vlastníka (Owner) a nejde ho z této domácnosti vyhodit ani ostatními případnými manažery</li>
+	</ul>
+</li>
+</ul>
+
+<h4>Člen domácnosti</h4>
+<ul>
+<li><b>Zobrazení obsahu spotřebičů a upozornění na expiraci</b>
+	<ul>
+		<li>Implementace: <code>HouseholdController@show</code>, <code>shelf/card</code>, <code>shelf/capacity-bar</code>, <code>food-item/expiry-tag</code>, Livewire <code>household/expiring-soon</code></li>
+		<li>Každá police ukazuje zaplnění (zelená / oranžová od 70 % / červená od 90 %) a uložené potraviny se štítkem expirace.</li>
+		<li>Panel nad policemi vypisuje potraviny prošlé nebo brzy expirující (do 7 dnů.)</li>
+	</ul>
+</li>
+<li><b>Přidání potraviny s kontrolou kapacity police</b>
+	<ul>
+		<li>Implementace: <code>FoodItemController@store</code>, Livewire <code>product/searchbar</code>, <code>food-item/add-dialog</code>, <code>Services/FoodItemPlacer</code></li>
+		<li>Potravinu lze vybrat v modálním okně s katalogem (strom kategorií a vyhledávání) nebo rychle přes vyhledávací pole, které použije výchozí cenu a trvanlivost produktu.</li>
+		<li><code>FoodItemPlacer</code> v transakci uzamkne řádek police a potravinu přidá jen tehdy, když součet hmotností uložených potravin a nové potraviny nepřekročí nosnost police (1 ml = 1 g).</li>
+	</ul>
+</li>
+<li><b>Označení potraviny jako snědené / vyhozené, odstranění</b>
+	<ul>
+		<li>Implementace: <code>FoodItemController@update</code>, <code>FoodItemController@destroy</code>, <code>food-item/row</code></li>
+		<li>Potravina se vždy sní nebo vyhodí celá. (Základní varianta)</li>
+		<li>Uloží se stav, čas (<code>removed_at</code>) a uživatel, který ji snědl nebo vyhodil (<code>resolved_by_user_id</code>); tyto záznamy jsou podkladem pro profil konzumace.</li>
+	</ul>
+</li>
+<li><b>Profil konzumace</b>
+	<ul>
+		<li>Implementace: doplnit</li>
+	</ul>
+</li>
+</ul>
+
+<h4>Správce a vlastník domácnosti</h4>
+<p>Vlastník má všechna práva správce a navíc může správce degradovat nebo odebrat.</p>
+<ul>
+<li><b>Správa členů a rolí</b>
+	<ul>
+		<li>Implementace: Livewire <code>household/member-list</code>, pravidla v <code>HouseholdMember::canRemove/canPromote/canDemote</code></li>
+		<li>Člena lze přidat jen podle e-mailu již registrovaného uživatele.</li>
+		<li>Správce může přidávat, odebírat a povyšovat členy; správce smí degradovat nebo odebrat jen vlastník a nikdo nemůže odebrat sám sebe.</li>
+	</ul>
+</li>
+<li><b>Správa spotřebičů a polic</b>
+	<ul>
+		<li>Implementace: <code>ApplianceController</code>, <code>ShelfController</code>, Livewire <code>appliance/manage-list</code></li>
+		<li>Police má popis, pořadí a nosnost v gramech.</li>
+		<li>Spotřebič ani polici nelze odstranit, dokud v nich jsou uložené potraviny.</li>
+	</ul>
+</li>
+<li><b>Správa katalogu kategorií a produktů</b>
+	<ul>
+		<li>Implementace: <code>CatalogueController</code>, <code>CategoryController</code>, <code>ProductController</code>, <code>Services/CatalogCopier</code> (kopie výchozího katalogu při první úpravě), <code>Services/CategoryTree</code>, <code>components/category/*</code></li>
+		<li>V databázi je uložen jeden výchozí katalog (kategorie a produkty s <code>household_id = NULL</code>), který sdílí všechny domácnosti.</li>
+		<li>Při první úpravě katalogu (přidání nebo odebrání kategorie či produktu) se celý výchozí strom i s produkty zkopíruje do domácnosti, nastaví se <code>has_custom_categories</code> a úprava se provede už na kopii; výchozí katalog se tak nikdy nemění.</li>
+		<li>Produkty a kategorie se nemažou z databáze uplně (pouze soft delete), aby na ně potraviny mohly dál odkazovat; kategorii lze smazat jen prázdnou.</li>
+	</ul>
+</li>
+</ul>
+
+<h4>Administrátor</h4>
+<ul>
+<li><b>Správa uživatelů</b>
+	<ul>
+		<li>Implementace: <code>/admin</code> (middleware <code>AuthenticateAdmin</code>), doplnit</li>
+	</ul>
+</li>
+</ul>
+
+<h3>Databáze</h3>
+
+<img src="doc/img/db_scheme.png" alt="Databese Scheme" width="1000"/>
+
+<h2>Instalace</h2>
+
+Stručně popište: 
+<ul>
+<li>postup instalace na server,</li>
+<li>softwarové požadavky (verze PHP apod.),</li>
+<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
+</ul>
+
+<h2>Známé problémy</h2>
+Žádné známé problémy o kterých by autoři věděli.
