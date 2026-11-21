@@ -7,4 +7,5 @@
         </p>
     </section>
     <a href="{{ route('households.index') }}" class="text-lg font-semibold tracking-tight underline">My households</a>
+    <a href="{{ route('consumption.index') }}" class="text-lg font-semibold tracking-tight underline">My consumption</a>
 </x-layouts::app>
