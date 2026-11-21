@@ -14,6 +14,7 @@ new class extends Component {
     public Household $household;
 
     public Shelf $shelf;
+    public bool $readOnly = false;
 
     /**
      * Runs before every update. Route middleware does not protect Livewire's update requests.
@@ -49,12 +50,14 @@ new class extends Component {
 
 <section
     data-shelf-card
-    class="cursor-pointer border border-stone-200 bg-white"
-    :class="{
-        'ring-2 ring-stone-800': activeShelfId === @js($shelf->id),
-        'ring-2 ring-amber-400': needsShelfPrompt,
-    }"
+    class="{{ $readOnly ? '' : 'cursor-pointer' }} border border-stone-200 bg-white"
+    @unless ($readOnly)
+        :class="{
+            'ring-2 ring-stone-800': activeShelfId === @js($shelf->id),
+            'ring-2 ring-amber-400': needsShelfPrompt,
+        }"
     @click="if (! $event.target.closest('button, a, input, select, form')) selectShelf(@js($shelf->id))"
+    @endunless
 >
     <header class="flex flex-wrap items-center gap-x-3 gap-y-1 bg-stone-100 px-3 py-2">
         <h3 class="font-semibold">{{ $shelf->label }}</h3>

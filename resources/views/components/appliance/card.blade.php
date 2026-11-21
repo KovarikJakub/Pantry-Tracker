@@ -1,4 +1,4 @@
-@props(['household', 'appliance', 'read-only' => false])
+@props(['household', 'appliance', 'readOnly' => false])
 
 @if ($appliance->shelves->isEmpty())
     <p class="mt-2">This appliance has no shelves.</p>
