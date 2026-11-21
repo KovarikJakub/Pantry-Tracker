@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -50,6 +51,37 @@ class ProductController extends Controller
 
         Gate::authorize('manage', $household);
 
+        $validator = Validator::make($request->all(), [
+            'category_id' => ['required', 'uuid'],
+            'name' => ['required', 'string', 'max:255'],
+            'barcode' => ['nullable', 'string', 'max:255'],
+            'default_size_g_ml' => ['required', 'numeric', 'min:0.01'],
+            'measurement_unit' => ['required', 'in:g,ml'],
+            'default_price' => ['required', 'numeric', 'min:0'],
+            'default_expiry_days' => ['required', 'integer', 'min:1'],
+            'calories_per_100g' => ['required', 'numeric', 'min:0', 'max:900'],
+            'protein_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+            'fat_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+            'carbs_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+            'fiber_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $macroSum = (float) $request->input('protein_per_100g')
+                + (float) $request->input('fat_per_100g')
+                + (float) $request->input('carbs_per_100g')
+                + (float) $request->input('fiber_per_100g');
+
+            if ($macroSum > 100.5) {
+                $validator->errors()->add(
+                    'protein_per_100g',
+                    'Protein, fat, carbohydrates, and fibre combined cannot exceed 100 g per 100 g.'
+                );
+            }
+        });
+
+        $validated = $validator->validateWithBag('product');
+
         $category = Category::query()
             ->where('household_id', $household->catalogueOwnerId())
             ->findOrFail($request->input('category_id'));
@@ -58,19 +90,7 @@ class ProductController extends Controller
         $categoryId = $copiedCategoryIds[$category->id] ?? $category->id;
 
         $household->products()->create([
-            ...$request->only([
-                'name',
-                'barcode',
-                'default_size_g_ml',
-                'measurement_unit',
-                'default_price',
-                'default_expiry_days',
-                'calories_per_100g',
-                'protein_per_100g',
-                'fat_per_100g',
-                'carbs_per_100g',
-                'fiber_per_100g',
-            ]),
+            ...$validated,
             'category_id' => $categoryId,
         ]);
 
@@ -87,24 +107,43 @@ class ProductController extends Controller
         $household = Household::query()->findOrFail($id);
         Gate::authorize('manage', $household);
 
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'barcode' => ['nullable', 'string', 'max:255'],
+            'default_size_g_ml' => ['required', 'numeric', 'min:0.01'],
+            'measurement_unit' => ['required', 'in:g,ml'],
+            'default_price' => ['required', 'numeric', 'min:0'],
+            'default_expiry_days' => ['required', 'integer', 'min:1'],
+            'calories_per_100g' => ['required', 'numeric', 'min:0', 'max:900'],
+            'protein_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+            'fat_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+            'carbs_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+            'fiber_per_100g' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $macroSum = (float) $request->input('protein_per_100g')
+                + (float) $request->input('fat_per_100g')
+                + (float) $request->input('carbs_per_100g')
+                + (float) $request->input('fiber_per_100g');
+
+            if ($macroSum > 100.5) {
+                $validator->errors()->add(
+                    'protein_per_100g',
+                    'Protein, fat, carbohydrates, and fibre combined cannot exceed 100 g per 100 g.'
+                );
+            }
+        });
+
+        $validated = $validator->validateWithBag('editProduct');
+
         $product = ProductCatalog::query()->where('household_id', $household->catalogueOwnerId())->findOrFail($productId);
 
-        $categoryId = DB::transaction(function () use ($household, $catalogCopier, $product, $request): string {
+        $categoryId = DB::transaction(function () use ($household, $catalogCopier, $product, $validated): string {
             $copiedProductIds = $catalogCopier->copyDefaultTo($household)['productIds'];
             $householdProduct = $household->products()->findOrFail($copiedProductIds[$product->id] ?? $product->id);
 
-            $householdProduct->update($request->only([
-                'name',
-                'barcode',
-                'default_size_g_ml',
-                'measurement_unit',
-                'default_price',
-                'calories_per_100g',
-                'protein_per_100g',
-                'fat_per_100g',
-                'carbs_per_100g',
-                'fiber_per_100g',
-            ]));
+            $householdProduct->update($validated);
 
             return $householdProduct->category_id;
         });
