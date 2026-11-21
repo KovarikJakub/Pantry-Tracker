@@ -1,6 +1,49 @@
 @php($readOnly ??= false)
 
-<x-household.layout :household="$household" :read-only="$readOnly">
+@if ($household)
+    <x-household.layout :household="$household" :read-only="$readOnly">
+        @unless ($readOnly)
+            <header class="flex items-center justify-between">
+                <a href="{{ route('households.store') }}">Create new household</a>
+            </header>
+
+            @if (($households ?? collect())->isNotEmpty())
+                <div
+                    x-data="{
+                        canScrollLeft: false,
+                        canScrollRight: false,
+                        updateArrows() {
+                            const el = this.$refs.scroller;
+                            this.canScrollLeft = el.scrollLeft > 2;
+                            this.canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
+                        },
+                        scrollBy(px) {
+                            this.$refs.scroller.scrollBy({ left: px, behavior: 'smooth' });
+                        },
+                    }"
+                    x-init="$nextTick(() => updateArrows())"
+                    @resize.window="updateArrows()"
+                    class="flex items-center gap-2"
+                >
+                    <button type="button" x-show="canScrollLeft" @click="scrollBy(-200)">&larr;</button>
+
+                    <nav x-ref="scroller" @scroll="updateArrows()" class="flex gap-2 overflow-x-auto whitespace-nowrap">
+                        @foreach ($households as $item)
+                            @php($isActive = $household->id === $item->id)
+                            <a
+                                href="{{ route('households.show', $item->id) }}"
+                                @if ($isActive) aria-current="page" class="font-bold underline" @endif
+                            >
+                                {{ $item->name }}
+                            </a>
+                        @endforeach
+                    </nav>
+
+                    <button type="button" x-show="canScrollRight" @click="scrollBy(200)">&rarr;</button>
+                </div>
+            @endif
+        @endunless
+
     @if ($readOnly)
         <div>
             <p>
@@ -19,7 +62,6 @@
     @endif
 
     <livewire:household.expiring-soon :household="$household->withoutRelations()" />
-
 
     @unless ($readOnly)
             <x-food-item.add-dialog
@@ -71,5 +113,15 @@
                 @endif
             </div>
     @endcan
-        @endunless
-</x-household.layout>
+            @endunless
+    </x-household.layout>
+@else
+    <x-layouts::app>
+        <header class="flex items-center justify-between">
+            <h1>Hi, {{ auth()->user()->name }}</h1>
+            <a href="{{ route('households.store') }}">Create new household</a>
+        </header>
+
+        <p>You don't have any households yet.</p>
+    </x-layouts::app>
+@endif

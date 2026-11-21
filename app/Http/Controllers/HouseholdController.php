@@ -21,11 +21,29 @@ class HouseholdController extends Controller
         return view('household.household');
     }
 
+    public function home(Request $request): View|RedirectResponse
+    {
+        if (! $request->user()) {
+            return view('welcome');
+        }
+
+        $firstHousehold = $request->user()->households()->orderBy('name')->first();
+
+        if ($firstHousehold) {
+            return redirect()->route('households.show', $firstHousehold->id);
+        }
+
+        return view('household.show', [
+            'household' => null,
+            'households' => collect(),
+        ]);
+    }
+
     /**
      * Shows the household's appliances and shelves, plus its product catalogue for the "Add food" modal.
      * Members only.
      */
-    public function show(string $id): View
+    public function show(string $id, Request $request): View
     {
         $household = Household::query()->findOrFail($id);
 
@@ -43,6 +61,7 @@ class HouseholdController extends Controller
 
         return view('household.show', [
             'household' => $household,
+            'households' => $request->user()->households()->orderBy('name')->get(),
             'catalogueCategoriesByParent' => $categories->groupBy('parent_id'),
             'catalogueProducts' => $products,
             'productCategoryIds' => $products->mapWithKeys(fn ($product) => [
@@ -50,4 +69,5 @@ class HouseholdController extends Controller
             ]),
         ]);
     }
+
 }

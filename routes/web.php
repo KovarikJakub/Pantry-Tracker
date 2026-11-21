@@ -30,7 +30,7 @@ Route::middleware(RedirectIfAuthenticated::class)->group(function () {
 });
 
 Route::middleware(Authenticate::class)->group(function () {
-    Route::view('/', 'home')->name('home');
+    Route::get('/', [HouseholdController::class, 'home'])->name('home');
     Route::post('/logout', LogoutController::class)->name('logout');
     Route::view('/admin', 'admin')->middleware(AuthenticateAdmin::class)->name('admin');
     Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');

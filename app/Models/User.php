@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Model
 {
@@ -36,5 +37,10 @@ class User extends Model
     public function fullName(): string
     {
         return $this->first_name.' '.$this->last_name;
+    }
+
+    public function households(): BelongsToMany
+    {
+        return $this->belongsToMany(Household::class, 'household_members');
     }
 }
