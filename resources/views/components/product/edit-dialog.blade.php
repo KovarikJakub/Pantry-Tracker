@@ -9,7 +9,7 @@
 --}}
 
 @php
-    $hasErrors = $errors->product->any();
+    $hasErrors = $errors->editProduct->any();
 
     /** @var array<string, array{label: string, max: int}> $nutritionFields */
     $nutritionFields = [

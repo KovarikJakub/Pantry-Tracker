@@ -26,10 +26,13 @@
         categoryId: @js($failedCategoryId),
         categoryName: @js($failedCategoryId ? $categoryNames->get($failedCategoryId) : null),
         unit: @js(old('measurement_unit', 'g')),
+        showServerErrors: @js($hasErrors),
         open(category) {
             this.categoryId = category.id;
             this.categoryName = category.name;
             this.unit = 'g';
+            this.macroError = '';
+            this.showServerErrors = false;
             this.$refs.form.querySelectorAll('input:not([type=hidden])').forEach((input) => input.value = '');
             this.$refs.dialog.showModal();
         },
@@ -57,19 +60,19 @@
                 <label class="col-span-2 flex flex-col gap-1">
                     Name
                     <input name="name" value="{{ old('name') }}" required maxlength="255" autofocus class="border px-2 py-1">
-                    @error('name', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                    @error('name', 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="col-span-2 flex flex-col gap-1">
                     <span>Barcode <span class="text-stone-500">(optional)</span></span>
                     <input name="barcode" value="{{ old('barcode') }}" maxlength="255" inputmode="numeric" class="border px-2 py-1">
-                    @error('barcode', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                    @error('barcode', 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     Package size
                     <input name="default_size_g_ml" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_size_g_ml') }}" required class="border px-2 py-1">
-                    @error('default_size_g_ml', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                    @error('default_size_g_ml', 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
@@ -78,19 +81,19 @@
                         <option value="g">g</option>
                         <option value="ml">ml</option>
                     </select>
-                    @error('measurement_unit', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                    @error('measurement_unit', 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     Default price
                     <input name="default_price" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_price') }}" required class="border px-2 py-1">
-                    @error('default_price', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                    @error('default_price', 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     Default expiry (days)
                     <input name="default_expiry_days" type="number" min="1" max="65535" step="1" inputmode="numeric" value="{{ old('default_expiry_days') }}" required class="border px-2 py-1">
-                    @error('default_expiry_days', 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                    @error('default_expiry_days', 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                 </label>
             </fieldset>
 
@@ -111,13 +114,13 @@
                             required
                             class="border px-2 py-1"
                         >
-                        @error($field, 'product') <span class="text-red-600">{{ $message }}</span> @enderror
+                        @error($field, 'product') <span x-show="showServerErrors" class="text-red-600">{{ $message }}</span> @enderror
                     </label>
                 @endforeach
                 <p x-show="macroError" x-text="macroError" class="col-span-2 text-red-600"></p>
             </fieldset>
 
-            @error('category_id', 'product') <p class="text-red-600">{{ $message }}</p> @enderror
+            @error('category_id', 'product') <p x-show="showServerErrors" class="text-red-600">{{ $message }}</p> @enderror
 
             <div class="flex justify-end gap-3">
                 <button type="button" class="underline" @click="$refs.dialog.close()">Cancel</button>
