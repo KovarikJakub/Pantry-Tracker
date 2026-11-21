@@ -11,13 +11,13 @@
     $hasErrors = $errors->product->any();
     $failedCategoryId = $hasErrors ? old('category_id') : null;
 
-    /** @var array<string, string> $nutritionFields input name => label */
+    /** @var array<string, array{label: string, max: int}> $nutritionFields */
     $nutritionFields = [
-        'calories_per_100g' => 'Energy (kcal)',
-        'protein_per_100g' => 'Protein (g)',
-        'fat_per_100g' => 'Fat (g)',
-        'carbs_per_100g' => 'Carbohydrates (g)',
-        'fiber_per_100g' => 'Fibre (g)',
+        'calories_per_100g' => ['label' => 'Energy (kcal)', 'max' => 900],
+        'protein_per_100g' => ['label' => 'Protein (g)', 'max' => 100],
+        'fat_per_100g' => ['label' => 'Fat (g)', 'max' => 100],
+        'carbs_per_100g' => ['label' => 'Carbohydrates (g)', 'max' => 100],
+        'fiber_per_100g' => ['label' => 'Fibre (g)', 'max' => 100],
     ];
 @endphp
 
@@ -97,13 +97,24 @@
             <fieldset class="grid grid-cols-2 gap-3">
                 <legend class="mb-2 font-medium">Nutrition per 100 <span x-text="unit"></span></legend>
 
-                @foreach ($nutritionFields as $field => $label)
+                @foreach ($nutritionFields as $field => $config)
                     <label class="flex flex-col gap-1">
-                        {{ $label }}
-                        <input name="{{ $field }}" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old($field) }}" required class="border px-2 py-1">
+                        {{ $config['label'] }}
+                        <input
+                            name="{{ $field }}"
+                            type="number"
+                            min="0"
+                            max="{{ $config['max'] }}"
+                            step="0.01"
+                            inputmode="decimal"
+                            value="{{ old($field) }}"
+                            required
+                            class="border px-2 py-1"
+                        >
                         @error($field, 'product') <span class="text-red-600">{{ $message }}</span> @enderror
                     </label>
                 @endforeach
+                <p x-show="macroError" x-text="macroError" class="col-span-2 text-red-600"></p>
             </fieldset>
 
             @error('category_id', 'product') <p class="text-red-600">{{ $message }}</p> @enderror
