@@ -13,10 +13,14 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShelfController;
 use App\Http\Controllers\ConsumptionController;
+use App\Http\Controllers\HouseholdShareController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
+
+// Public route
+Route::get('/shared/{token}', [HouseholdShareController::class, 'show'])->name('households.share-token');
 
 Route::middleware(RedirectIfAuthenticated::class)->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -50,11 +54,12 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::delete('/households/{id}/products/{productId}', [ProductController::class, 'destroy'])->whereUuid(['id', 'productId'])->name('households.products.destroy');
     Route::post('/households/{id}/products', [ProductController::class, 'store'])->whereUuid('id')->name('households.products.store');
 
+    Route::post('households/{id}/share-token', [HouseholdShareController::class, 'store'])->whereUuid('id')->name('households.share-token.store');
+    Route::delete('households/{id}/share-token', [HouseholdShareController::class, 'destroy'])->whereUuid('id')->name('households.share-token.destroy');
+
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/consumption', [ConsumptionController::class, 'index'])->name('consumption.index');
-
-
 });
