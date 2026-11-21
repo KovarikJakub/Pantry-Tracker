@@ -10,6 +10,9 @@
         :open-category-ids="$openCategoryIds"
     />
 
+    <x-product.edit-dialog
+    />
+
     <x-product.add-dialog
         :household="$household"
         :category-names="$categoriesByParent->flatten(1)->pluck('name', 'id')"

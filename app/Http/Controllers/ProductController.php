@@ -76,4 +76,38 @@ class ProductController extends Controller
         return redirect()->route('households.catalogue', $household->id)
             ->with('opened_category_id', $categoryId);
     }
+
+    /**
+     * Updates a product in the household's catalogue. A household still using the default tree
+     * gets its own copy first. Managers only.
+     */
+    public function update(Request $request, CatalogCopier $catalogCopier, string $id, string $productId): RedirectResponse
+    {
+        $household = Household::query()->findOrFail($id);
+        Gate::authorize('manage', $household);
+
+        $product = ProductCatalog::query()->where('household_id', $household->catalogueOwnerId())->findOrFail($productId);
+
+        $categoryId = DB::transaction(function () use ($household, $catalogCopier, $product, $request): string {
+            $copiedProductIds = $catalogCopier->copyDefaultTo($household)['productIds'];
+            $householdProduct = $household->products()->findOrFail($copiedProductIds[$product->id] ?? $product->id);
+
+            $householdProduct->update($request->only([
+                'name',
+                'barcode',
+                'default_size_g_ml',
+                'measurement_unit',
+                'default_price',
+                'calories_per_100g',
+                'protein_per_100g',
+                'fat_per_100g',
+                'carbs_per_100g',
+                'fiber_per_100g',
+            ]));
+
+            return $householdProduct->category_id;
+        });
+
+        return redirect()->route('households.catalogue', $household->id)->with('opened_category_id', $categoryId);
+    }
 }

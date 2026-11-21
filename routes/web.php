@@ -53,6 +53,7 @@ Route::middleware(Authenticate::class)->group(function () {
 
     Route::delete('/households/{id}/products/{productId}', [ProductController::class, 'destroy'])->whereUuid(['id', 'productId'])->name('households.products.destroy');
     Route::post('/households/{id}/products', [ProductController::class, 'store'])->whereUuid('id')->name('households.products.store');
+    Route::patch('/households/{id}/products/{productId}', [ProductController::class, 'update'])->whereUuid(['id', 'productId'])->name('households.products.update');
 
     Route::post('households/{id}/share-token', [HouseholdShareController::class, 'store'])->whereUuid('id')->name('households.share-token.store');
     Route::delete('households/{id}/share-token', [HouseholdShareController::class, 'destroy'])->whereUuid('id')->name('households.share-token.destroy');
