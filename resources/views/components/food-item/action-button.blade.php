@@ -3,9 +3,10 @@
 {{-- Icon-only submit button; the label appears as a tooltip on hover or keyboard focus. --}}
 
 <button
-    type="submit"
     aria-label="{{ $label }}"
-    {{ $attributes->merge(['class' => 'group/action relative inline-flex size-7 items-center justify-center rounded text-stone-600 hover:bg-stone-200 hover:text-stone-900']) }}
+    {{ $attributes->merge([ 'type' => 'submit',
+                            'class' => 'group/action relative inline-flex size-7 items-center justify-center rounded text-stone-600 hover:bg-stone-200 hover:text-stone-900',
+                            ]) }}
 >
     <svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         @switch($icon)

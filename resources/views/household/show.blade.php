@@ -29,6 +29,7 @@
                 :products="$catalogueProducts"
                 :product-category-ids="$productCategoryIds"
             />
+            <x-food-item.resolve-dialog />
         @endunless
 
     <x-shelf.selection :household="$household">

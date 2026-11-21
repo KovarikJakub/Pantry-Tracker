@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class FoodItemController extends Controller
 {
@@ -57,21 +58,44 @@ class FoodItemController extends Controller
      */
     public function update(Request $request, string $id, string $foodItemId): RedirectResponse
     {
-        $status = $request->validate([
-            'status' => ['required', Rule::in(['consumed', 'thrown_out'])],
-        ])['status'];
-
         $household = Household::query()->findOrFail($id);
         $userId = $request->user()->id;
 
         Gate::authorize('view', $household);
 
-        $this->storedFoodItemOf($household, $foodItemId)->update([
-            'status' => $status,
-            'removed_at' => now(),
-            'resolved_by_user_id' => $userId,
+        $foodItem = $this->storedFoodItemOf($household, $foodItemId);
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['consumed', 'thrown_out'])],
+            'amount' => ['nullable', 'numeric', 'min:0.01', 'max:'.$foodItem->weight_volume],
         ]);
 
+        $status = $validated['status'];
+        $amount = isset($validated['amount']) ? (float) $validated['amount'] : (float) $foodItem->weight_volume;
+
+        DB::transaction(function () use ($amount, $foodItem, $status, $userId): void {
+            if ($amount >= (float) $foodItem->weight_volume - 0.01) {
+                $foodItem->update([
+                    'status' => $status,
+                    'removed_at' => now(),
+                    'resolved_by_user_id' => $userId,
+                ]);
+                return;
+            }
+
+            $foodItem->update([
+                'weight_volume' => round((float) $foodItem->weight_volume - $amount, 2),
+            ]);
+
+            $resolved = $foodItem->replicate();
+            $resolved->fill([
+                'weight_volume' => round($amount, 2),
+                'status' => $status,
+                'removed_at' => now(),
+                'resolved_by_user_id' => $userId,
+            ]);
+            $resolved->save();
+    });
         return redirect()->route('households.show', $household->id);
     }
 
