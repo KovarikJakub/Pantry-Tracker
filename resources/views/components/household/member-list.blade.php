@@ -207,20 +207,20 @@ new class extends Component {
                 </div>
 
                 @php($actionClass = 'inline-flex cursor-pointer items-center rounded-full border px-3 py-1 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-wait disabled:opacity-50')
-                    <div class="flex w-48 shrink-0 justify-end gap-2" wire:loading.class="pointer-events-none" wire:target="promote, demote, remove">
-                        @if ($this->actor->canPromote($membership))
-                            <button
-                                type="button"
-                                wire:click="promote(@js($member->id))"
-                                wire:loading.attr="disabled"
-                                aria-label="Promote {{ $member->fullName() }} to manager"
-                                title="Make manager"
-                                class="{{ $actionClass }} border-[#6E5D8F]/30 bg-[#EFEBF6]/60 text-[#6E5D8F] hover:border-[#6E5D8F] hover:bg-[#EFEBF6] focus-visible:outline-[#6E5D8F]"
-                            >
-                                Promote
-                            </button>
-                        @endif
-                    </div>
+                <div class="flex w-48 shrink-0 justify-end gap-2" wire:loading.class="pointer-events-none" wire:target="promote, demote, remove">
+                    @if ($this->actor->canPromote($membership))
+                        <button
+                            type="button"
+                            wire:click="promote(@js($member->id))"
+                            wire:loading.attr="disabled"
+                            aria-label="Promote {{ $member->fullName() }} to manager"
+                            title="Make manager"
+                            class="{{ $actionClass }} border-[#6E5D8F]/30 bg-[#EFEBF6]/60 text-[#6E5D8F] hover:border-[#6E5D8F] hover:bg-[#EFEBF6] focus-visible:outline-[#6E5D8F]"
+                        >
+                            Promote
+                        </button>
+                    @endif
+                    {{-- REMOVED the extra </div> that was here --}}
                     @if ($this->actor->canDemote($membership))
                         <button
                             type="button"

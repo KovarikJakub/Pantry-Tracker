@@ -43,9 +43,7 @@ class HouseholdShareController extends Controller
         $household->share_token = Str::random(32);
         $household->save();
 
-        return redirect()
-            ->route('households.show', $household->id)
-            ->with('status', 'Share token generated.');
+        return back();
     }
 
     /**
@@ -61,8 +59,6 @@ class HouseholdShareController extends Controller
         $household->share_token = null;
         $household->save();
 
-        return redirect()
-            ->route('households.show', $household->id)
-            ->with('status', 'Share token disabled.');
+        return back();
     }
 }
