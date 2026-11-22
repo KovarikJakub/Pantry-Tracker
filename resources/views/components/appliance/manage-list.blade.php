@@ -89,43 +89,55 @@ new class extends Component
 ?>
 
 {{-- Appliances with their shelves and the "Add shelf" form, for the Appliances tab. --}}
-<div>
+<div class="mt-6 max-w-2xl">
     @if ($status && $statusApplianceId === null)
-        <p role="status" class="mt-4">{{ $status }}</p>
+        <p role="status" class="mb-4 rounded-xl border border-[#2F4A3A]/15 bg-[#EFEBF6]/60 px-4 py-2 text-sm text-[#2F4A3A]">
+            {{ $status }}
+        </p>
     @endif
 
     @if ($this->appliances->isEmpty())
-        <p class="mt-4">There are no appliances in this household.</p>
+            <p class="text-sm text-[#2F4A3A]/60">There are no appliances in this household.</p>
     @else
+        <div class="space-y-8">
         @foreach ($this->appliances as $appliance)
-            <div wire:key="{{ $appliance->id }}">
-                <div class="mt-8 flex items-center gap-4">
-                    <h2 class="text-xl font-semibold">{{ $appliance->name }} ({{ $appliance->appliance_type }})</h2>
+            <section wire:key="{{ $appliance->id }}" class="space-y-3">
+                <div class="flex items-center justify-between gap-4">
+                    <h2 class="flex items-center text-xl font-semibold tracking-tight text-[#2F4A3A]">
+                        {{ $appliance->name }}
+                        <span class="ml-3 rounded-full bg-[#EFEBF6] px-3 py-0.5 text-xs font-medium text-[#2F4A3A]">
+                                {{ $appliance->appliance_type }}
+                        </span>
+                    </h2>
 
                     <button
                         type="button"
                         wire:click="removeAppliance(@js($appliance->id))"
                         wire:confirm="{{ 'Remove '.$appliance->name.' and all its shelves?' }}"
                         wire:loading.attr="disabled"
-                        class="inline-flex cursor-pointer items-center rounded border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
+                        class="inline-flex cursor-pointer items-center rounded-full border border-red-600/30 bg-transparent px-3 py-1 text-xs font-medium text-red-700 transition hover:border-red-600 hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
                     >
                         Remove
                     </button>
                 </div>
 
                 @if ($status && $statusApplianceId === $appliance->id)
-                    <p role="status" class="mt-2 text-sm">{{ $status }}</p>
+                    <p role="status" class="rounded-xl border border-[#2F4A3A]/15 bg-red-200/30 px-4 py-2 text-sm text-[#2F4A3A]">
+                        {{ $status }}
+                    </p>
                 @endif
 
-                <ul class="mt-2 flex max-w-xl flex-col divide-y divide-stone-200 border border-stone-200 bg-white">
+                <ul class="flex flex-col divide-y divide-[#2F4A3A]/10 overflow-hidden rounded-xl border border-[#2F4A3A]/15 bg-white shadow-sm">
                     @if ($appliance->shelves->isEmpty())
-                        <li class="px-3 py-2 text-sm text-stone-500">This appliance has no shelves.</li>
+                        <li class="px-4 py-3 text-sm italic text-[#2F4A3A]/50">This appliance has no shelves.</li>
                     @endif
 
                     {{-- Columns: name (flex-1), load (w-66, same as the capacity bar), action (w-12); the add-shelf row uses the same widths. --}}
                     @foreach ($appliance->shelves as $shelf)
-                        <li wire:key="{{ $shelf->id }}" class="flex items-center gap-3 px-3 py-2">
-                            <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ $shelf->label }}</span>
+                        <li wire:key="{{ $shelf->id }}" class="flex items-center gap-3 px-4 py-3 transition hover:bg-[#F4F6F4]/60">
+                            <span class="min-w-0 flex-1 truncate text-sm font-medium text-[#2F4A3A]">
+                                    {{ $shelf->label }}
+                            </span>
 
                             <x-shelf.capacity-bar
                                 class="w-66 shrink-0"
@@ -140,7 +152,7 @@ new class extends Component
                                     wire:loading.attr="disabled"
                                     aria-label="Remove shelf {{ $shelf->label }}"
                                     title="Remove shelf"
-                                    class="flex size-6 cursor-pointer items-center justify-center rounded text-stone-500 hover:bg-red-50 hover:text-red-700 disabled:cursor-wait disabled:opacity-50"
+                                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-[#2F4A3A]/50 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-wait disabled:opacity-50"
                                 >&times;</button>
                             </div>
                         </li>
@@ -148,7 +160,8 @@ new class extends Component
 
                     <x-shelf.add-form :household="$household" :appliance="$appliance" />
                 </ul>
-            </div>
+            </section>
         @endforeach
+        </div>
     @endif
 </div>

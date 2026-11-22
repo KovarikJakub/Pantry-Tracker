@@ -14,19 +14,19 @@
             placeholder="New shelf name"
             aria-label="New shelf name for {{ $appliance->name }}"
             required
-            class="min-w-0 flex-1 border border-stone-300 bg-white px-2 py-1 text-sm"
+            class="min-w-0 flex-1 rounded-xl border border-[#2F4A3A]/20 pl-3 pr-2 py-1 text-sm"
         >
         <input
             name="max_load_capacity_g"
             type="number"
             min="0"
-            step="0.01"
+            step="1000"
             placeholder="Max load (g)"
             aria-label="Max load in grams for {{ $appliance->name }}"
             required
-            class="w-66 shrink-0 border border-stone-300 bg-white px-2 py-1 text-sm"
+            class="rounded-xl border border-[#2F4A3A]/20 pl-3 pr-2 py-1 text-sm"
         >
-        <button type="submit" class="w-12 shrink-0 cursor-pointer bg-stone-800 py-1 text-sm text-white hover:bg-stone-700">Add</button>
+        <button type="submit" class="rounded-full bg-[#2F4A3A] px-3 py-1.5 text-xs font-medium text-white">Add</button>
     </form>
 
     @foreach ($shelfErrors->all() as $message)

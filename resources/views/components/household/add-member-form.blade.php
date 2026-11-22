@@ -11,7 +11,7 @@
             placeholder="Add user by email"
             aria-label="Add user by email"
             required
-            class="min-w-0 flex-1 border border-stone-300 bg-white px-2 py-1 text-sm"
+            class="w-full rounded-xl border border-[#2F4A3A]/20 bg-white px-3.5 py-1.5 text-sm text-[#2F4A3A] placeholder:text-[#2F4A3A]/40 focus:border-[#2F4A3A] focus:outline-none focus:ring-2 focus:ring-[#2F4A3A]/15"
         >
 
 
@@ -20,7 +20,7 @@
                 type="submit"
                 wire:loading.attr="disabled"
                 wire:target="add"
-                class="cursor-pointer bg-stone-800 px-3 py-1 text-sm text-white hover:bg-stone-700 disabled:cursor-wait disabled:opacity-50"
+                class="cursor-pointer rounded-full bg-[#2F4A3A] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#2F4A3A]/90"
             >Add</button>
         </div>
     </form>
