@@ -1,6 +1,8 @@
 <x-household.layout :household="$household" title="Catalogue">
     @error('category_id', 'categoryDelete')
-        <p role="alert" class="my-2 text-red-600">{{ $message }}</p>
+    <p role="alert" class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        {{ $message }}
+    </p>
     @enderror
 
     <x-category.tree
