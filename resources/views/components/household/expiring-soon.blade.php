@@ -53,23 +53,45 @@ new class extends Component {
 
 <div>
     @if ($this->items->isNotEmpty())
-        <section aria-labelledby="expiring-soon-title">
-            <h2 id="expiring-soon-title" class="font-semibold">
-                Expiring soon <span class="font-normal text-stone-600">({{ $this->items->count() }})</span>
+        <section x-data="{ expanded: false }" aria-labelledby="expiring-soon-title">
+            <h2 id="expiring-soon-title" class="mb-2 text-base font-semibold text-[#2F4A3A]">
+                Expiring soon <span class="font-normal text-[#2F4A3A]/60">({{ $this->items->count() }})</span>
             </h2>
 
-            <ul class="mt-2 space-y-1">
-                @foreach ($this->items->take($this->maxShown()) as $item)
-                    <li wire:key="{{ $item->id }}" class="flex items-center gap-3">
+            <ul class="mt-2 space-y-1.5">
+                @foreach ($this->items as $item)
+                    <li
+                        wire:key="{{ $item->id }}"
+                        @if ($loop->index >= $this->maxShown()) x-show="expanded" x-cloak @endif
+                        class="flex items-center gap-3 text-sm"
+                    >
                         <x-food-item.expiry-tag :expiry-date="$item->expiration_date" />
-                        <span>{{ $item->product->name }}</span>
-                        <span class="text-stone-500">{{ $item->shelf->label }}</span>
+                        <span class="text-[#2F4A3A]">{{ $item->product->name }}</span>
+                        <span class="text-[#2F4A3A]/60">{{ $item->shelf->label }}</span>
                     </li>
                 @endforeach
             </ul>
 
             @if ($this->items->count() > $this->maxShown())
-                <p class="mt-2 text-stone-600">and {{ $this->items->count() - $this->maxShown() }} more</p>
+                <button
+                    type="button"
+                    @click="expanded = !expanded"
+                    class="mt-2 inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-[#2F4A3A]/70 transition hover:text-[#2F4A3A]"
+                >
+                    <span x-text="expanded ? 'Show less' : 'and {{ $this->items->count() - $this->maxShown() }} more'"></span>
+                    <svg
+                        class="size-3.5 transition-transform"
+                        :class="expanded && 'rotate-180'"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
             @endif
         </section>
     @endif
