@@ -70,4 +70,27 @@ class HouseholdController extends Controller
         ]);
     }
 
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+
+        $household = DB::transaction(function () use ($request, $validated) {
+            $household = Household::create([
+                'name' => $validated['name'],
+            ]);
+
+            $household->members()->create([
+                'user_id' => $request->user()->id,
+                'role' => 'owner',
+                'joined_at' => now(),
+            ]);
+
+            return $household;
+        });
+
+        return redirect()->route('households.show', $household->id);
+    }
+
 }

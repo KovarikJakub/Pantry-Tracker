@@ -10,9 +10,7 @@
             <h1 class="text-2xl font-semibold tracking-tight text-[#2F4A3A]">
                 Hi, {{$user?->first_name}}
             </h1>
-            <a href="{{ route('households.store') }}"
-               class="rounded-full border border-[#2F4A3A]/30 bg-transparent px-4 py-1.5 text-sm font-medium text-[#2F4A3A] transition hover:border-[#2F4A3A] hover:bg-[#EFEBF6]/70"
-            >Create new household</a>
+            <x-household.create-popup />
         </header>
             @if (($households ?? collect())->isNotEmpty())
                 <div
