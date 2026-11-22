@@ -250,4 +250,97 @@ new class extends Component {
 
         <x-household.add-member-form />
     </ul>
+    @can('manage', $household)
+        <div class="mt-8 pt-5">
+            @if ($household->share_token)
+                @php($shareUrl = route('households.share-token', $household->share_token))
+
+                <div class="flex flex-wrap items-center gap-3">
+                    {{-- Share link pill/box with Copy + Regenerate icons --}}
+                    <div
+                        x-data="{
+                            copied: false,
+                            copy() {
+                                navigator.clipboard.writeText(@js($shareUrl));
+                                this.copied = true;
+                                setTimeout(() => this.copied = false, 2000);
+                            }
+                        }"
+                        class="flex max-w-full items-center gap-2 rounded-xl border border-[#2F4A3A]/20 bg-white py-1.5 pl-3.5 pr-1.5 shadow-sm"
+                    >
+                                <span
+                                    class="truncate text-sm text-[#2F4A3A] no-underline hover:text-[#2F4A3A]/75"
+                                >
+                                    {{ $shareUrl }}
+                                </span>
+
+                        <div class="flex shrink-0 items-center gap-1 border-l border-[#2F4A3A]/15 pl-1.5">
+                            {{-- Copy icon button --}}
+                            <button
+                                type="button"
+                                @click="copy()"
+                                aria-label="Copy share link"
+                                class="group/tip relative inline-flex size-8 items-center justify-center rounded-lg text-[#2F4A3A]/70 transition hover:bg-[#f3eBD0] hover:text-[#2F4A3A]"
+                            >
+                                <svg x-show="!copied" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                </svg>
+                                <svg x-show="copied" x-cloak class="size-4 text-[#2F4A3A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                                <span
+                                    x-text="copied ? 'Copied!' : 'Copy'"
+                                    class="invisible absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 rounded bg-stone-800 px-2 py-0.5 text-xs whitespace-nowrap text-white group-hover/tip:visible group-focus-visible/tip:visible"
+                                ></span>
+                            </button>
+
+                            {{-- Regenerate icon button --}}
+                            <form method="POST" action="{{ route('households.share-token.store', $household->id) }}" class="inline">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    aria-label="Regenerate"
+                                    class="group/tip relative inline-flex size-8 items-center justify-center rounded-lg text-[#2F4A3A]/70 transition hover:bg-[#f3eBD0] hover:text-[#2F4A3A]"
+                                >
+                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                                        <path d="M16 16h5v5" />
+                                    </svg>
+                                    <span class="invisible absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 rounded bg-stone-800 px-2 py-0.5 text-xs whitespace-nowrap text-white group-hover/tip:visible group-focus-visible/tip:visible">
+                                        Regenerate
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {{-- Disable Sharing (red secondary) --}}
+                    <form method="POST" action="{{ route('households.share-token.destroy', $household->id) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button
+                            type="submit"
+                            class="rounded-xl border border-red-600/35 bg-transparent px-3.5 py-2 text-sm font-medium text-red-700 transition hover:border-red-600 hover:bg-red-50"
+                        >
+                            Disable sharing
+                        </button>
+                    </form>
+                </div>
+            @else
+                {{-- Shown when no share link exists --}}
+                <form method="POST" action="{{ route('households.share-token.store', $household->id) }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="rounded-xl border border-[#2F4A3A]/30 bg-transparent px-4 py-2 text-sm font-medium text-[#2F4A3A] transition hover:border-[#2F4A3A] hover:bg-[#f3eBD0]/70"
+                    >
+                        Generate share link
+                    </button>
+                </form>
+            @endif
+        </div>
+    @endcan
 </section>

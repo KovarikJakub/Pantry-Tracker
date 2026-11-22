@@ -53,7 +53,7 @@ new class extends Component {
 
 <div>
     @if ($this->items->isNotEmpty())
-        <section aria-labelledby="expiring-soon-title" class="mt-6 border border-orange-200 bg-orange-50 px-4 py-3 text-sm">
+        <section aria-labelledby="expiring-soon-title">
             <h2 id="expiring-soon-title" class="font-semibold">
                 Expiring soon <span class="font-normal text-stone-600">({{ $this->items->count() }})</span>
             </h2>

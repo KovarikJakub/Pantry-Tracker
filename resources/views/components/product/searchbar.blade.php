@@ -121,6 +121,13 @@ new class extends Component {
     @shelf-selected.window="$refs.input.focus()"
 >
     <div class="relative">
+        <p class="mb-2 text-sm" role="status">
+            <span x-show="activeShelfLabel !== null" class="text-stone-600">Adding to <span class="font-semibold" x-text="activeShelfLabel"></span></span>
+            <span
+                x-show="activeShelfLabel === null"
+                :class="needsShelfPrompt ? 'mt-1.5 text-xs text-[#2F4A3A]/60' : 'text-stone-500'"
+            >Select a shelf below to add products to it.</span>
+        </p>
         <input
             x-ref="input"
             type="search"
@@ -131,7 +138,7 @@ new class extends Component {
             aria-autocomplete="list"
             :aria-expanded="open"
             autocomplete="off"
-            class="w-full border bg-white px-3 py-2 text-sm"
+            class="w-full max-w-md rounded-xl border border-[#2F4A3A]/25 bg-white px-4 py-2 text-sm text-[#2F4A3A] placeholder:text-[#2F4A3A]/45 shadow-sm transition focus:border-[#2F4A3A] focus:outline-none focus:ring-2 focus:ring-[#d78c7d]/40"
             @focus="open = true"
             @input="open = true; highlighted = -1"
             @keydown.arrow-down.prevent="move(1)"
@@ -141,7 +148,7 @@ new class extends Component {
         >
 
         @if ($this->isSearching || $errors->has('shelf_id'))
-            <div x-show="open" class="absolute top-full left-0 z-20 mt-1 w-full border border-stone-200 bg-white text-sm shadow-lg">
+            <div x-show="open" class="mt-1 w-full max-w-md overflow-hidden rounded-xl border border-[#2F4A3A]/20 bg-white shadow-md">
                 @error('shelf_id')
                     <p role="alert" class="px-3 py-2 text-red-700">{{ $message }}</p>
                 @enderror
@@ -176,12 +183,4 @@ new class extends Component {
             </div>
         @endif
     </div>
-
-    <p class="mt-1 text-sm" role="status">
-        <span x-show="activeShelfLabel !== null" class="text-stone-600">Adding to <span class="font-semibold" x-text="activeShelfLabel"></span></span>
-        <span
-            x-show="activeShelfLabel === null"
-            :class="needsShelfPrompt ? 'font-semibold text-amber-700' : 'text-stone-500'"
-        >Select a shelf below to add products to it.</span>
-    </p>
 </div>

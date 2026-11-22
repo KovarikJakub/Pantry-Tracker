@@ -50,29 +50,22 @@ new class extends Component {
 
 <section
     data-shelf-card
-    class="{{ $readOnly ? '' : 'cursor-pointer' }} border border-stone-200 bg-white"
+    class="{{ $readOnly ? '' : 'cursor-pointer' }} overflow-hidden rounded-xl border border-[#2F4A3A]/15 bg-white shadow-sm transition"
     @unless ($readOnly)
         :class="{
-            'ring-2 ring-stone-800': activeShelfId === @js($shelf->id),
+            ' ring-2 ring-[#d78c7d]/70': activeShelfId === @js($shelf->id),
             'ring-2 ring-amber-400': needsShelfPrompt,
         }"
     @click="if (! $event.target.closest('button, a, input, select, form')) selectShelf(@js($shelf->id))"
     @endunless
 >
-    <header class="flex flex-wrap items-center gap-x-3 gap-y-1 bg-stone-100 px-3 py-2">
-        <h3 class="font-semibold">{{ $shelf->label }}</h3>
+    <header class="flex items-center justify-between border-b border-[#2F4A3A]/10 bg-[#EFEBF6]/60 px-4 py-2.5">
+        <h3 class="text-sm font-semibold text-[#2F4A3A] pr-4">{{ $shelf->label }}</h3>
         @unless ($readOnly)
         <button
             type="button"
-            class="text-xs underline"
-            :aria-pressed="activeShelfId === @js($shelf->id)"
-            @click="toggleShelf(@js($shelf->id))"
-            x-text="activeShelfId === @js($shelf->id) ? 'Selected' : 'Select'"
-        >Select</button>
-        <button
-            type="button"
             x-data
-            class="text-xs underline"
+            class="rounded-full border border-[#2F4A3A]/30 bg-transparent px-3 py-1 text-xs font-medium text-[#2F4A3A] transition hover:border-[#2F4A3A] hover:bg-[#EFEBF6]/70"
             @click="$dispatch('open-add-food', @js(['id' => $shelf->id, 'label' => $shelf->label]))"
         >+ Add food</button>
         @endunless
@@ -93,7 +86,7 @@ new class extends Component {
             <col class="w-52">
             @endunless
         </colgroup>
-        <tbody>
+        <tbody class="divide-y divide-[#2F4A3A]/10 text-sm text-[#2F4A3A]">
             @forelse ($this->items as $item)
                 <x-food-item.row :household="$household" :food-item="$item" :read-only="$readOnly"/>
             @empty

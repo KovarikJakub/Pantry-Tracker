@@ -1,49 +1,8 @@
 @php($readOnly ??= false)
+@php($user = $currentUser ?? request()->user())
 
 @if ($household)
-    <x-household.layout :household="$household" :read-only="$readOnly">
-        @unless ($readOnly)
-            <header class="flex items-center justify-between">
-                <a href="{{ route('households.store') }}">Create new household</a>
-            </header>
-
-            @if (($households ?? collect())->isNotEmpty())
-                <div
-                    x-data="{
-                        canScrollLeft: false,
-                        canScrollRight: false,
-                        updateArrows() {
-                            const el = this.$refs.scroller;
-                            this.canScrollLeft = el.scrollLeft > 2;
-                            this.canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
-                        },
-                        scrollBy(px) {
-                            this.$refs.scroller.scrollBy({ left: px, behavior: 'smooth' });
-                        },
-                    }"
-                    x-init="$nextTick(() => updateArrows())"
-                    @resize.window="updateArrows()"
-                    class="flex items-center gap-2"
-                >
-                    <button type="button" x-show="canScrollLeft" @click="scrollBy(-200)">&larr;</button>
-
-                    <nav x-ref="scroller" @scroll="updateArrows()" class="flex gap-2 overflow-x-auto whitespace-nowrap">
-                        @foreach ($households as $item)
-                            @php($isActive = $household->id === $item->id)
-                            <a
-                                href="{{ route('households.show', $item->id) }}"
-                                @if ($isActive) aria-current="page" class="font-bold underline" @endif
-                            >
-                                {{ $item->name }}
-                            </a>
-                        @endforeach
-                    </nav>
-
-                    <button type="button" x-show="canScrollRight" @click="scrollBy(200)">&rarr;</button>
-                </div>
-            @endif
-        @endunless
-
+    <x-household.layout :household="$household" :households="$households ?? collect()" :read-only="$readOnly">
     @if ($readOnly)
         <div>
             <p>
@@ -58,10 +17,12 @@
     @endif
 
     @if (session('food_item_status'))
-        <p class="mt-4">{{ session('food_item_status') }}</p>
+                <p class="mt-4 rounded-lg border border-[#d78c7d]/50 bg-[#d78c7d]/15 px-4 py-2 text-sm text-[#2F4A3A]">
+                    {{ session('food_item_status') }}</p>
     @endif
-
-    <livewire:household.expiring-soon :household="$household->withoutRelations()" />
+    <div class="mt-6 border-[#2F4A3A]/15 pb-5 text-[#2F4A3A]">
+        <livewire:household.expiring-soon :household="$household->withoutRelations()" />
+    </div>
 
     @unless ($readOnly)
             <x-food-item.add-dialog
@@ -78,7 +39,8 @@
         @unless ($readOnly)
             {{-- Hidden without shelves, as there is nowhere to add food. Sticky, so the bar stays reachable while picking a shelf further down the page. --}}
             @if ($household->appliances->contains(fn ($appliance) => $appliance->shelves->isNotEmpty()))
-                <div class="sticky top-0 z-30 mt-6 bg-stone-50 py-2">
+                <div class="sticky top-0 z-30 mt-2 bg-[#F4F6F4]/90 py-2 backdrop-blur-sm">
+                    <h2 class="mb-2 text-base font-semibold text-[#2F4A3A]">Quick Add</h2>
                     <livewire:product.searchbar :household="$household->withoutRelations()" />
                 </div>
             @endif
@@ -86,40 +48,16 @@
 
         <x-appliance.list :household="$household" :read-only="$readOnly"/>
     </x-shelf.selection>
-
-    @unless($readOnly)
-            @can('manage', $household)
-        @if($household->share_token)
-            <p>
-                Share link: <a href="{{ route('households.share-token', $household->share_token) }}" class="underline break-all">
-                    {{ route('households.share-token', $household->share_token) }}
-                </a>
-            </p>
-        @endif
-            <div class="flex items-center gap-2">
-                <form method="POST" action="{{ route('households.share-token.store', $household->id) }}">
-                    @csrf
-                    <button type="submit">
-                        {{ $household->share_token ? 'Regenerate Share Link' : 'Generate Share Link' }}
-                    </button>
-                </form>
-
-                @if ($household->share_token)
-                    <form method="POST" action="{{ route('households.share-token.destroy', $household->id) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-3 py-1.5 border rounded">Disable Sharing</button>
-                    </form>
-                @endif
-            </div>
-    @endcan
-            @endunless
     </x-household.layout>
 @else
     <x-layouts::app>
-        <header class="flex items-center justify-between">
-            <h1>Hi, {{ auth()->user()->name }}</h1>
-            <a href="{{ route('households.store') }}">Create new household</a>
+        <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <h1 class="text-2xl font-semibold tracking-tight text-[#2F4A3A]">
+                Hi, {{$user?->first_name}}
+            </h1>
+            <a href="{{ route('households.store') }}"
+               class="rounded-full border border-[#2F4A3A]/30 bg-transparent px-4 py-1.5 text-sm font-medium text-[#2F4A3A] transition hover:border-[#2F4A3A] hover:bg-[#EFEBF6]/70"
+            >Create new household</a>
         </header>
 
         <p>You don't have any households yet.</p>

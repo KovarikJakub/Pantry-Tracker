@@ -9,30 +9,42 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-stone-50 font-sans text-stone-800 antialiased">
-    <div class="mx-auto flex min-h-screen max-w-5xl flex-col px-6">
-        <header class="flex h-16 items-center justify-between border-b border-stone-200">
-            <a href="{{ route('home') }}" class="text-lg font-semibold tracking-tight">{{ config('app.name') }}</a>
+<body class="flex min-h-screen flex-col bg-[#F4F6F4] text-[#2F4A3A] antialiased">
+    <header class="w-full bg-[#2F4A3A] text-white shadow-xs">
+        <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+            <a href="{{ route('home') }}" class="text-lg font-semibold tracking-tight text-white">
+                {{ config('app.name') }}
+            </a>
 
             @isset($currentUser)
-                <form method="POST" action="{{ route('logout') }}" class="flex items-center gap-4 text-sm">
-                    @csrf
-                    <a href="{{ route('profile.show') }}" class="hover:underline">
+                <nav class="flex items-center gap-6 text-sm text-white/80">
+                    <a href="{{ route('consumption.index') }}" class="transition hover:text-white">
+                        My consumption
+                    </a>
+                    <a href="{{ route('profile.show') }}" class="transition hover:text-white">
                         {{ $currentUser->fullName() }}
                     </a>
-                    <button type="submit" class="underline">Log out</button>
-                </form>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="cursor-pointer underline decoration-white/40 underline-offset-4 transition hover:text-white hover:decoration-white">
+                            Log out
+                        </button>
+                    </form>
+                </nav>
             @endisset
-        </header>
+        </div>
+    </header>
 
-        <main class="flex-1 py-12">
-            {{ $slot }}
-        </main>
+    <main class="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
+        {{ $slot }}
+    </main>
 
-        <footer class="border-t border-stone-200 py-6 text-sm text-stone-500">
+    <footer class="w-full border-t border-[#2F4A3A]/10 py-6">
+        <div class="mx-auto max-w-5xl px-6 text-sm text-[#2F4A3A]/55">
             {{ config('app.name') }}
-        </footer>
-    </div>
+        </div>
+    </footer>
+
     @livewireScripts
 </body>
 </html>
