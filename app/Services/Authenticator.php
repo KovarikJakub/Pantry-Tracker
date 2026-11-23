@@ -13,6 +13,7 @@ use Illuminate\Contracts\Session\Session;
 class Authenticator
 {
     private const SESSION_KEY = 'user_id';
+    private const LAST_ACTIVITY_KEY = 'last_activity';
 
     public function __construct(
         private Hasher $hasher,
@@ -30,6 +31,7 @@ class Authenticator
         // New session id after login prevents session fixation attacks.
         $this->session->regenerate();
         $this->session->put(self::SESSION_KEY, $user->id);
+        $this->session->put(self::LAST_ACTIVITY_KEY, now()->timestamp);
 
         return true;
     }
@@ -41,6 +43,17 @@ class Authenticator
         if ($userId === null) {
             return null;
         }
+
+        $timeoutSeconds = (int) config('session.lifetime', 30) * 60;
+        $lastActivity = $this->session->get(self::LAST_ACTIVITY_KEY);
+
+        if ($lastActivity !== null && (now()->timestamp - $lastActivity) > $timeoutSeconds) {
+            $this->logout();
+
+            return null;
+        }
+
+        $this->session->put(self::LAST_ACTIVITY_KEY, now()->timestamp);
 
         $user = User::query()->find($userId);
 
