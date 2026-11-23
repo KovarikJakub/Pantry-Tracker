@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!-- saved from url=(0064)https://www.fit.vut.cz/study/course/IIS/private/projekt/doc.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-2">
-    
+
     <title>Projekt IIS</title>
     <style type="text/css">
     	table { border-collapse: collapse; }
@@ -11,7 +11,7 @@
 <script src="chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/js/recordConsoleEvents.js"></script></head>
 <body>
 
-<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
+<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu
      podle použitého editoru -->
 
 <h1>FIT Lednice</h1> <!-- Nahradte názvem svého zadání -->
@@ -19,11 +19,11 @@
 <dl>
 	<dt>Autoři</dt>
 	<dd>Jakub Kovařík
-	    <a href="mailto:xkovarj00@stud.fit.vutbr.cz">xkovarj00@stud.fit.vutbr.cz</a> -
+	    <a href="mailto:xkovarj00@stud.fit.vutbr.cz">xkovarj00@stud.fit.vutbr.cz</a> ?
 		Návrh datového modelu, Návrh případů užití, Implementace (BE+FE) stránky domácností, produktového katalogu, přihlašování/registrace.
 	</dd>
 	<dd>Aneta Warzelová
-	    <a href="mailto:xwarzea00@stud.fit.vutbr.cz">xwarzea00@stud.fit.vutbr.cz</a> - 
+	    <a href="mailto:xwarzea00@stud.fit.vutbr.cz">xwarzea00@stud.fit.vutbr.cz</a> ?
 		Návrh datového modelu, Návrh případů užití, Implementace Admin sekce, Uživatelského profilu, Profil konzumace, UI/UX stránek.
 	</dd>
 	<dt>URL aplikace</dt>
@@ -44,7 +44,7 @@
 
 <h3>Video</h3>
 
-<p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
+<p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p>
 
 <h2>Implementace</h2>
 <p>Aplikace je postavena na frameworku <b>Laravel 13 (PHP 8.5)</b> s databází <b>MySQL 8</b>. Uživatelské rozhraní tvoří <b>Blade</b> a <b>Livewire 4</b> komponenty stylované pomocí <b>Tailwind CSS.</b></p>
@@ -71,7 +71,7 @@
 </li>
 <li><b>Náhled domácnosti přes sdílený odkaz</b>
 	<ul>
-		<li>Implementace: doplnit</li>
+        <li>Implementace: <code>HouseholdShareTokenController</code>, <code>views/households/show</code> (s příznakem $readOnly), <code>components/household/layout</code>, <code>components/appliance/list</code>, <code>livewire/household/expiring-soon</code></li>
 	</ul>
 </li>
 </ul>
@@ -81,13 +81,15 @@
 <li><b>Přihlášení / odhlášení</b>
 	<ul>
 		<li>Implementace: <code>Auth/LoginController</code>, <code>Auth/LogoutController</code>, <code>Services/Authenticator</code></li>
-		<li>Vlastní přihlašování přes session (klíč <code>user_id</code>), napojené na Laravel <code>Auth</code>, takže fungují <code>Gate</code> a <code>@can</code>.</li>
-		<li>Lze zablkovoat uživatelský účet (může udělat Admin). Tento uživatelský účet zůstane v databázi ale nemůže se přihlásit. Admin může odblokovat.</li>
+		<li>Obsahuje automatické odhlášení po době neaktivity (kontrola <code>last_activity</code> v <code>Services/Authenticator</code> podle <code>SESSION_LIFETIME</code>).</li>
+        <li>Vlastní přihlašování přes session (klíč <code>user_id</code>), napojené na Laravel <code>Auth</code>, takže fungují <code>Gate</code> a <code>@can</code>.</li>
 	</ul>
 </li>
 <li><b>Úprava profilu</b>
 	<ul>
-		<li>Implementace: doplnit</li>
+        <li>Implementace: <code>ProfileController</code>, <code>views/profile/show</code>, <code>views/profile/edit</code>
+        <li>Uživatel si může zobrazit a upravit své údaje (jméno, příjmení, e-mail).</li>
+        <li>Může také deaktivovat vlastní účet (deactivated = true), čímž je okamžitě odhlášen a nemůže se znovu přihlásit, dokud účet administrátor neaktivuje zpět.</li>
 	</ul>
 </li>
 <li><b>Vytvoření domácnosti</b>
@@ -123,7 +125,9 @@
 </li>
 <li><b>Profil konzumace</b>
 	<ul>
-		<li>Implementace: doplnit</li>
+		<li>Implementace: <code>ConsumptionController</code>, <code>views/consumption/index</code></li>
+        <li>Zobrazuje přehled snědených potravin přihlášeného uživatele.</li>
+        <li>Vypočítává celkovou cenu a nutriční hodnoty (energie, bílkoviny, tuky, sacharidy, vláknina) na základě zkonzumovaného množství a údajů z katalogu produktů.</li>
 	</ul>
 </li>
 </ul>
@@ -159,9 +163,19 @@
 <ul>
 <li><b>Správa uživatelů</b>
 	<ul>
-		<li>Implementace: <code>/admin</code> (middleware <code>AuthenticateAdmin</code>), doplnit</li>
+        <li>Implementace: <code>/admin/users</code> (middleware <code>AuthenticateAdmin</code>), <code>AdminUserController</code>, <code>views/admin/users/index</code></li>
+        <li>Administrátor vidí seznam všech uživatelů včetně data vytvoření účtu (created_at) a stavu účtu (Admin / User / Deactivated) a může v nich vyhledávat podle jména nebo e-mailu.</li>
+        <li>Aktivním uživatelům může přidělit či odebrat roli administrátora nebo jejich účet smazat (sám sobě roli změnit ani účet smazat nemůže).</li>
+        <li>Deaktivované účty jsou v tabulce odlišené, nelze jim měnit roli ani je mazat, ale administrátor je může jedním tlačítkem znovu aktivovat.</li>
 	</ul>
 </li>
+</ul>
+
+<h3>Rozšíření</h3>
+<h4>Částečná konzumace potraviny</h4>
+<ul>
+    <li>Implementace: <code>FoodItemController@update</code>, <code>components/food-item/resolve-dialog</code></li>
+    <li>Uživatel může v dialogu zadat pouze částečné množství (v gramech nebo mililitrech), které snědl nebo vyhodil.</li>
 </ul>
 
 <h3>Databáze</h3>
@@ -170,7 +184,7 @@
 
 <h2>Instalace</h2>
 
-Stručně popište: 
+Stručně popište:
 <ul>
 <li>postup instalace na server,</li>
 <li>softwarové požadavky (verze PHP apod.),</li>
