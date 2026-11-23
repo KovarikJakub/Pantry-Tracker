@@ -236,7 +236,7 @@
                                 <div class="mt-1 space-y-0.5 text-xs text-[#2F4A3A]/65">
                                     <p>{{ (float) $product->default_size_g_ml }} {{ $product->measurement_unit }}</p>
                                     <p>{{ (float) $product->calories_per_100g }} kcal / 100 {{ $product->measurement_unit }}</p>
-                                    <p>Default price: {{ (float) $product->default_price }}</p>
+                                    <p>Default price: {{ (float) $product->default_price }} Kč</p>
                                 </div>
                             </div>
 

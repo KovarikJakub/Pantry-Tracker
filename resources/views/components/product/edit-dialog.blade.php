@@ -85,19 +85,16 @@
                 <label class="col-span-2 flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Name</span>
                     <input name="name" value="{{ old('name') }}" required maxlength="255" autofocus class="{{ $inputClass }}">
-                    @error('name', 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="col-span-2 flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Barcode <span class="font-normal text-[#2F4A3A]/55">(optional)</span></span>
                     <input name="barcode" value="{{ old('barcode') }}" maxlength="255" inputmode="numeric" class="{{ $inputClass }}">
-                    @error('barcode', 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Package size</span>
                     <input name="default_size_g_ml" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_size_g_ml') }}" required class="{{ $inputClass }}">
-                    @error('default_size_g_ml', 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
@@ -111,18 +108,15 @@
                             <path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" />
                         </svg>
                     </div>
-                    @error('measurement_unit', 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-[#2F4A3A]">Default price</span>
+                    <span class="text-xs font-medium text-[#2F4A3A]">Default price (Kč)</span>
                     <input name="default_price" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_price') }}" required class="{{ $inputClass }}">
-                    @error('default_price', 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Default expiry (days)</span>
                     <input name="default_expiry_days" type="number" min="1" max="65535" step="1" inputmode="numeric" value="{{ old('default_expiry_days') }}" required class="{{ $inputClass }}">
-                    @error('default_expiry_days', 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
             </fieldset>
 
@@ -146,7 +140,6 @@
                             required
                             class="{{ $inputClass }}"
                         >
-                        @error($field, 'editProduct') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                     </label>
                 @endforeach
                 <p x-show="macroError" x-text="macroError" class="col-span-2 text-xs text-red-600"></p>

@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShelfController;
 use App\Http\Controllers\ConsumptionController;
 use App\Http\Controllers\HouseholdShareController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -32,7 +33,14 @@ Route::middleware(RedirectIfAuthenticated::class)->group(function () {
 Route::middleware(Authenticate::class)->group(function () {
     Route::get('/', [HouseholdController::class, 'home'])->name('home');
     Route::post('/logout', LogoutController::class)->name('logout');
-    Route::view('/admin', 'admin')->middleware(AuthenticateAdmin::class)->name('admin');
+
+    Route::middleware(AuthenticateAdmin::class)->prefix('admin')->group(function () {
+        Route::view('/', 'admin')->name('admin');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::patch('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('admin.users.toggle-admin');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+    });
+
     Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
     Route::post('/households', [HouseholdController::class, 'store'])->name('households.store');
     Route::get('/households/{id}', [HouseholdController::class, 'show'])->whereUuid('id')->name('households.show');

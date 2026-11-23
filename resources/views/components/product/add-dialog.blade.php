@@ -37,7 +37,7 @@
             document.body.classList.remove('overflow-hidden');
         },
     }"
-    x-init="if (@js($hasErrors)) { document.body.classList.add('overflow-hidden'); $refs.dialog.showModal(); }"
+    x-init="if (@js($hasErrors)) { document.body.classList.add('overflow-hidden'); $nextTick(() => $refs.dialog.showModal()); }"
     @open-add-product.window="open($event.detail)"
 >
     <dialog
@@ -68,6 +68,28 @@
                 </button>
             </div>
 
+            {{-- Top Error Banner --}}
+            @if ($hasErrors)
+                <div
+                    x-show="showServerErrors"
+                    role="alert"
+                    class="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs text-red-700"
+                >
+                    <ul class="list-disc space-y-1 pl-4">
+                        @foreach ($errors->product->all() as $message)
+                            <li>{{ $message }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <p
+                x-show="macroError"
+                x-text="macroError"
+                role="alert"
+                class="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs text-red-700"
+            ></p>
+
             {{-- Product details --}}
             <fieldset class="grid grid-cols-2 gap-3">
                 <legend class="mb-2 text-xs font-semibold uppercase tracking-wide text-[#2F4A3A]/60">Product</legend>
@@ -75,19 +97,16 @@
                 <label class="col-span-2 flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Name</span>
                     <input name="name" value="{{ old('name') }}" required maxlength="255" autofocus class="{{ $inputClass }}">
-                    @error('name', 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="col-span-2 flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Barcode <span class="font-normal text-[#2F4A3A]/55">(optional)</span></span>
                     <input name="barcode" value="{{ old('barcode') }}" maxlength="255" inputmode="numeric" class="{{ $inputClass }}">
-                    @error('barcode', 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Package size</span>
                     <input name="default_size_g_ml" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_size_g_ml') }}" required class="{{ $inputClass }}">
-                    @error('default_size_g_ml', 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
@@ -101,19 +120,16 @@
                             <path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" />
                         </svg>
                     </div>
-                    @error('measurement_unit', 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Default price</span>
                     <input name="default_price" type="number" min="0" step="0.01" inputmode="decimal" value="{{ old('default_price') }}" required class="{{ $inputClass }}">
-                    @error('default_price', 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-[#2F4A3A]">Default expiry (days)</span>
                     <input name="default_expiry_days" type="number" min="1" max="65535" step="1" inputmode="numeric" value="{{ old('default_expiry_days') }}" required class="{{ $inputClass }}">
-                    @error('default_expiry_days', 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                 </label>
             </fieldset>
 
@@ -137,15 +153,9 @@
                             required
                             class="{{ $inputClass }}"
                         >
-                        @error($field, 'product') <span x-show="showServerErrors" class="text-xs text-red-600">{{ $message }}</span> @enderror
                     </label>
                 @endforeach
-                <p x-show="macroError" x-text="macroError" class="col-span-2 text-xs text-red-600"></p>
             </fieldset>
-
-            @error('category_id', 'product')
-            <p x-show="showServerErrors" class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-xs text-red-700">{{ $message }}</p>
-            @enderror
 
             {{-- Footer actions --}}
             <div class="flex items-center justify-end gap-2 border-t border-[#2F4A3A]/10 pt-4">

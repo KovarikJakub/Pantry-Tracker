@@ -24,10 +24,36 @@
                     <a href="{{ route('profile.show') }}" class="transition hover:text-white">
                         {{ $currentUser->fullName() }}
                     </a>
-                    <form method="POST" action="{{ route('logout') }}">
+                    @if (app(\App\Services\Authenticator::class)->user()?->is_admin)
+                        <a
+                            href="{{ route('admin.users.index') }}"
+                            class="text-sm font-medium text-white/90 transition hover:text-white {{ request()->routeIs('admin.*') ? 'underline underline-offset-4' : '' }}"
+                        >
+                            Admin Page
+                        </a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}" class="flex items-center">
                         @csrf
-                        <button type="submit" class="cursor-pointer underline decoration-white/40 underline-offset-4 transition hover:text-white hover:decoration-white">
-                            Log out
+                        <button
+                            type="submit"
+                            aria-label="Log out"
+                            title="Log out"
+                            class="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg text-white/80 transition hover:bg-white/10 hover:text-white"
+                        >
+                            <svg
+                                aria-hidden="true"
+                                class="size-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" x2="9" y1="12" y2="12" />
+                            </svg>
                         </button>
                     </form>
                 </nav>

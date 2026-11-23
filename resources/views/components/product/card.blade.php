@@ -5,7 +5,7 @@
     <p class="mt-1.5 font-semibold text-[#2F4A3A]">{{ $product->name }}</p>
     <p class="text-xs text-[#2F4A3A]/65">{{ (float) $product->default_size_g_ml }} {{ $product->measurement_unit }}</p>
     <p class="text-xs text-[#2F4A3A]/65">{{ (float) $product->calories_per_100g }} kcal / 100 {{ $product->measurement_unit }}</p>
-    <p class="text-xs text-[#2F4A3A]/65">Default price: {{ (float) $product->default_price }}</p>
+    <p class="text-xs text-[#2F4A3A]/65">Default price: {{ (float) $product->default_price }} Kč</p>
     <button type="submit" form="add-food-item" name="product_id" value="{{ $product->id }}" class="mt-3 w-full cursor-pointer rounded-full bg-[#2F4A3A] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#2F4A3A]/90"
     >Add
     </button>
