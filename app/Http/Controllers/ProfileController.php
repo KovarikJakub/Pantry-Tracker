@@ -34,4 +34,17 @@ class ProfileController extends Controller {
             ->route('profile.show')
             ->with('status', 'Profile updated successfully.');
     }
+
+    public function deactivate(Request $request, Authenticator $authenticator): RedirectResponse
+    {
+        $user = $authenticator->user();
+
+        $user->update(['deactivated' => true]);
+
+        $authenticator->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('status', 'Your account has been deactivated.');
+    }
 }

@@ -50,5 +50,29 @@
                 </div>
             </dl>
         </div>
+        {{-- Deactivate Account --}}
+        <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-red-600/20 bg-red-50/40 px-6 py-4">
+            <div>
+                <h2 class="text-sm font-semibold text-red-800">Deactivate account</h2>
+                <p class="mt-0.5 text-xs text-red-700/80">
+                    You will be logged out and will no longer be able to sign in.
+                </p>
+            </div>
+
+            <form
+                method="POST"
+                action="{{ route('profile.deactivate') }}"
+                onsubmit="return confirm('Are you sure you want to deactivate your account? You will be logged out immediately.')"
+            >
+                @csrf
+                @method('PATCH')
+                <button
+                    type="submit"
+                    class="cursor-pointer rounded-full border border-red-600/35 bg-white px-4 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-600 hover:bg-red-50"
+                >
+                    Deactivate
+                </button>
+            </form>
+        </div>
     </div>
 </x-layouts::app>

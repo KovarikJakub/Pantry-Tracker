@@ -39,6 +39,7 @@ Route::middleware(Authenticate::class)->group(function () {
         Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
         Route::patch('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('admin.users.toggle-admin');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+        Route::patch('/users/{user}/activate', [AdminUserController::class, 'activate'])->name('admin.users.activate');
     });
 
     Route::get('/households', [HouseholdController::class, 'index'])->name('households.index');
@@ -69,6 +70,7 @@ Route::middleware(Authenticate::class)->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/deactivate', [ProfileController::class, 'deactivate'])->name('profile.deactivate');
 
     Route::get('/consumption', [ConsumptionController::class, 'index'])->name('consumption.index');
 });

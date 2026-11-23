@@ -105,7 +105,16 @@
                             {{-- Actions --}}
                             <td class="whitespace-nowrap px-5 py-3.5 text-right">
                                 @if ($user->deactivated)
-                                    <span class="text-xs text-[#2F4A3A]/45">Not manageable</span>
+                                    <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button
+                                            type="submit"
+                                            class="cursor-pointer rounded-full border border-[#2F4A3A]/30 bg-white px-3 py-1 text-xs font-medium text-[#2F4A3A] transition hover:border-[#2F4A3A] hover:bg-[#EFEBF6]/70"
+                                        >
+                                            Activate
+                                        </button>
+                                    </form>
                                 @elseif ($user->id !== $currentUserId)
                                     <div class="inline-flex items-center justify-end gap-2">
                                         <form method="POST" action="{{ route('admin.users.toggle-admin', $user) }}" class="contents">

@@ -67,4 +67,15 @@ class AdminUserController extends Controller
 
         return back()->with('status', "User {$name} was deleted.");
     }
+
+    public function activate(User $user): RedirectResponse
+    {
+        if (! $user->deactivated) {
+            return back()->with('error', 'This account is already active.');
+        }
+
+        $user->update(['deactivated' => false]);
+
+        return back()->with('status', "{$user->first_name} {$user->last_name}'s account has been activated.");
+    }
 }
