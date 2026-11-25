@@ -1,58 +1,72 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FIT Lednice – Household Food Management
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web information system for managing food in households: fridges and freezers split into shelves, food items with
+expiry dates and nutrition values, and a consumption profile that shows what you ate, your nutritional intake and
+what it cost.
 
-## About Laravel
+## Tech stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Layer | Technology |
+|---|---|
+| Backend | PHP 8.5, Laravel 13 |
+| Frontend | Blade, Livewire 4 (with Alpine.js), Tailwind CSS 4, Vite |
+| Database | MySQL 8 (Docker), Eloquent ORM, migrations, seeders |
+| Testing | Pest (feature tests against a dedicated MySQL test database) |
+| Code style | Laravel Pint |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Screenshots
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Adding food with the quick search bar
 
-## Learning Laravel
+![Adding a product to a shelf with the quick search bar](doc/img/add.gif)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Appliances tab (household managers)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+![Appliances tab with shelf load bars and the add-appliance form](doc/img/appliances.png)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Editable product catalogue (household managers)
 
-## Agentic Development
+![Product catalogue with a multi-level category hierarchy](doc/img/catalog.png)
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Functionality
+
+- **Households** – a user creates a household and becomes its **owner**, then invites existing users by email.
+  Roles: owner, manager, member.
+- **Appliances & shelves** – each shelf has a maximum load. Adding food that would exceed it is refused.
+- **Food items** – added from a multi-level product catalogue (e.g. *Dairy → Yoghurts → Plain yoghurts*), shown with
+  expiry tags, and marked as consumed or thrown out.
+- **Expiry alerts** – food that has expired or expires within 7 days is listed above the shelves.
+- **Consumption profile** – consumed food over a day, a week or a custom range, with calories, macros and cost.
+- **Per-household catalogue** – managers can customise categories and products without affecting other households.
+- **Guest access** – a read-only view of a household through a revocable share link.
+- **Profile** – users edit their details or deactivate their own account.
+- **Administration** – an admin can search users, reactivate deactivated accounts, grant or revoke admin rights,
+  and delete users.
+
+
+## Running locally
+
+Requirements: PHP 8.4+, Composer, Node.js, Docker.
 
 ```bash
-composer require laravel/boost --dev
+# MySQL 8 in Docker
+docker run -d --name mysql-laravel -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret mysql:8.0
+docker exec mysql-laravel mysql -uroot -psecret -e "CREATE DATABASE my_app_db; CREATE DATABASE my_app_db_test;"
 
-php artisan boost:install
+cp .env.example .env              # set DB_PASSWORD=secret
+composer install
+npm install
+php artisan key:generate
+php artisan migrate:fresh --seed  # demo households, shelves, food and 3 weeks of history
+composer run dev                  # app on http://127.0.0.1:8000
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Run the tests with `php artisan test --compact`.
 
-## Contributing
+### Demo account
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Feel free to create an account or try the demo account:
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Email | Role | Passowrd |
+|---|---|---|
+| `test@email.com` | User | testuser |
